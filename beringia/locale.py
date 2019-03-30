@@ -1,7 +1,5 @@
 import numpy as np
-import networkx as nx
-import time
-from soil import geology
+from beringia.soil import geology
 
 FEATURES_SWITCH={
 	'geology': True

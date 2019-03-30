@@ -1,8 +1,8 @@
 import numpy as np
 import networkx as nx
 import time
-from localebase import locale
-from constants import *
+from beringia.localebase import locale
+from beringia.constants import *
 
 STATE_CONSTANTS ={
 	0: {'stateIncreaseProb': 0.20,	'stateDecreaseProb': 0, 	'fireStartProb': 0.000,	'fireSpreadProb': 0.000},
