@@ -1,30 +1,29 @@
 # -*- coding: utf-8 -*-
 """locale.py
+
+.. _Docstring example here:
+   https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 """
 import numpy as np
 
 from beringia.soil import Geology
-from beringia.constants import COLOR_KEY, STATE_CONSTANTS
-
-FEATURES_SWITCH={
-    'geology': True
-}
+from beringia.constants import COLOR_KEY, STATE_CONSTANTS, FEATURES_SWITCH
 
 
 class Locale(object):
-    """A locale is conceptually a small region which contains a number of biotic and abiotic
-    features which simulate a local ecosystem. It has been conceived of initally as a patch 
-    of land about 1 acre in size."""
+    """A locale is conceptually a small region which contains a number of biotic and abiotic features which simulate a
+    local ecosystem. It has been conceived of initially as a patch of land about 1 acre in size.
+    """
     def __init__(self):
         self.state = 0
         self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
-        self.on_fire=0
+        self.on_fire = 0
 
-        if FEATURES_SWITCH['geology']: 
+        if FEATURES_SWITCH['geology']:
             self.geology = Geology()
 
     def __str__(self):
-        if self.on_fire==0:
+        if self.on_fire == 0:
             return COLOR_KEY[self.state]
         elif self.on_fire == 1:
             return '\033[1;31mf\033[0;37m'
@@ -65,4 +64,3 @@ class Locale(object):
     def burn(self):
         self.state = -1
         self.on_fire = 0
-

@@ -1,29 +1,15 @@
 # -*- coding: utf-8 -*-
 """fire.py
+
+.. _Docstring example here:
+   https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 """
-import numpy as np
-import networkx as nx
 import time
 
-STATE_CONSTANTS ={
-    0: {'stateIncreaseProb': 0.20,    'stateDecreaseProb': 0,     'fireStartProb': 0.000,    'fireSpreadProb': 0.000},
-    1: {'stateIncreaseProb': 0.10,    'stateDecreaseProb': 0.00,     'fireStartProb': 0.0005,    'fireSpreadProb': 0.100},
-    2: {'stateIncreaseProb': 0.15,    'stateDecreaseProb': 0.00,     'fireStartProb': 0.0005,    'fireSpreadProb': 0.200},
-    3: {'stateIncreaseProb': 0.10,    'stateDecreaseProb': 0.00,     'fireStartProb': 0.0005,    'fireSpreadProb': 0.300},
-    4: {'stateIncreaseProb': 0.10,    'stateDecreaseProb': 0.00,     'fireStartProb': 0.0005,    'fireSpreadProb': 0.450},
-    5: {'stateIncreaseProb': 0.00,    'stateDecreaseProb': 0.00,     'fireStartProb': 0.0005,    'fireSpreadProb': 0.700},
-    -1:{'stateIncreaseProb': 1.00,    'stateDecreaseProb': 0.00,     'fireStartProb': 0.000,    'fireSpreadProb': 0.000}
-    }
+import numpy as np
+import networkx as nx
 
-COLOR_KEY = {
-    0: '\033[1;30;48;5;246m0\033[0;39m',
-    1: '\033[1;30;48;5;190m1\033[0;39m',
-    2: '\033[1;30;48;5;118m2\033[0;39m',
-    3: '\033[1;30;48;5;46m3\033[0;39m',
-    4: '\033[1;30;48;5;34m4\033[0;39m',
-    5: '\033[1;30;48;5;2m5\033[0;39m',
-    -1:'f'
-}
+from beringia.constants import STATE_CONSTANTS, COLOR_KEY
 
 
 class MXRegion(object):
@@ -47,10 +33,10 @@ class MXRegion(object):
         self.colorize = colorize
 
     def __repr__(self, verbose=False):
-        if verbose==False or self.grid_type != '2d':
+        if not verbose or self.grid_type != '2d':
             return f'NXRegion {self.xdim}x{self.ydim}'
-        else: 
-            out=''
+        else:
+            out = ''
             for x in range(self.xdim):
                 for y in range(self.ydim):
                     out += str(self.view_locale())
@@ -58,9 +44,9 @@ class MXRegion(object):
             return out
 
     def __str__(self, verbose=False):
-        if verbose==False or self.grid_type != '2d':
+        if not verbose or self.grid_type != '2d':
             return f'NXRegion {self.xdim}x{self.ydim}'
-        else: 
+        else:
             out = ''
             for x in range(self.xdim):
                 for y in range(self.ydim):
@@ -70,7 +56,7 @@ class MXRegion(object):
 
     def show_map(self, do_print=True):
         if self.grid_type == '2d':
-            out=''
+            out = ''
             for x in range(self.xdim):
                 for y in range(self.ydim):
                     out += str(self.view_locale(x, y))
@@ -78,7 +64,7 @@ class MXRegion(object):
             out += '\r'
             if do_print:
                 print(out)
-            else: 
+            else:
                 return out
         else:
             print('!!! This grid type does not have this feature implemented !!!')
@@ -101,7 +87,7 @@ class MXRegion(object):
                 out += '\n'
             if do_print:
                 print(out)
-            else: 
+            else:
                 return out
         else:
             print('!!! This grid type does not have this feature implemented !!!')
@@ -113,7 +99,7 @@ class MXRegion(object):
             count:
         """
         for _ in range(count):
-            self.time+=1
+            self.time += 1
             for node in self.space.nodes:
                 self.space.node[node]['locale'].pass_time()
             self.spread_fire()
@@ -133,23 +119,25 @@ class MXRegion(object):
     def spread_fire(self, slow_burn=False):
         """Scan locales for fire, and if present, cause fire to spread to neighboring regions.
 
+        Todo:
+            * add locales_to_burn
         Args:
             slow_burn:
         """
         locales_on_fire = []
-        locales_to_burn = {}
         fires_present = False
         for node in self.space.nodes:
-            if self.space.node[node]['locale'].onFire == 1: 
+            if self.space.node[node]['locale'].on_fire == 1:
                 locales_on_fire.append(node)
-        if locales_on_fire: fires_present = True
+        if locales_on_fire:
+            fires_present = True
         for locale_ in locales_on_fire:
             neighboring_nodes = self.space.neighbors(locale_)
             for node in neighboring_nodes:
-                if self.space.node[node]['locale'].onFire==0:
+                if self.space.node[node]['locale'].on_fire == 0:
                     if self.space.node[node]['locale'].catch_fire():
                         locales_on_fire.append(node)
-                        if slow_burn == True:
+                        if slow_burn:
                             self.show_map()
                             time.sleep(0.15)
         if fires_present:
@@ -168,7 +156,7 @@ class Region():
         self.xdim = xdim
         self.ydim = ydim
         self.space = [[Locale() for x in range(self.xdim)] for y in range(self.ydim)]
-        self.conversion_rates = {0:0.2, 1:0.1, 2:0.15, 3: 0.05, 4:0.1, 5:0}
+        self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
         self.time = 0
 
     def __repr__(self):
@@ -193,10 +181,12 @@ class Region():
             for item in line:
                 out += str(item.on_fire)
             out += '\n'
-        if do_print: print(out)
-        else: return out
+        if do_print:
+            print(out)
+        else:
+            return out
 
-    def pass_time(self, count = 1):
+    def pass_time(self, count=1):
         for _ in range(count):
             self.time += 1
             for line in self.space:
@@ -205,12 +195,15 @@ class Region():
             self.spread_fire()
 
     def spread_fire(self):
+        """
+        Todo:
+            * add locales_to_burn
+        """
         locales_on_fire = []
-        locales_to_burn = {}
         for x in range(self.xdim):
             for y in range(self.ydim):
                 if self.space[x][y].on_fire == 1:
-                    locales_on_fire.append([x,y])
+                    locales_on_fire.append([x, y])
 
         for locale_ in locales_on_fire:
             if locale_[0]-1 >= 0 and self.space[locale_[0]-1][locale_[1]].on_fire == 0:
@@ -285,8 +278,7 @@ class ABiotics(object):
     """docstring for ClassName"""
     def __init__(self, soil=1.0, bedrock=1.0, moisture=1.0, nutrients=1.0):
         super(ABiotics, self).__init__()
-        self.soil=soil
-        self.bedrock=bedrock
-        self.moisture=moisture
-        self.nutrients=nutrients
-
+        self.soil = soil
+        self.bedrock = bedrock
+        self.moisture = moisture
+        self.nutrients = nutrients

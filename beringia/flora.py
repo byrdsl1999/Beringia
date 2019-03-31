@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """flora.py
+
+.. _Docstring example here:
+   https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 """
 from scipy import stats
 
@@ -50,7 +53,7 @@ class PlantBulk(Flora):
     def _sufficient_nutrients(cls, environment=None):
         if environment:
             return False
-        else: 
+        else:
             return True
 
     @classmethod
@@ -83,4 +86,3 @@ class SoftWoods(PlantBulk):
 
 class HardWoods(PlantBulk):
     pass
-

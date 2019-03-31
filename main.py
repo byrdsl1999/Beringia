@@ -1,12 +1,11 @@
-import time
-
-import numpy as np
-import networkx as nx
+# -*- coding: utf-8 -*-
+"""main.py
+"""
 
 
 def main():
-	pass
+    pass
 
 
 if __name__ == '__main__':
-	main()
+    main()

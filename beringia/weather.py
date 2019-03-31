@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""weather.py
+
+.. _Docstring example here:
+   https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+"""
 import math
 
 import numpy
@@ -7,6 +13,7 @@ from beringia.feature import Feature
 
 class Weather(Feature):
     def __init__(self, periodicity=12):
+        super(Weather, self).__init__()
         self.periodicity = periodicity
         self.rain_base = 0.5
         self.rain_boost = 0.5
@@ -20,7 +27,7 @@ class Weather(Feature):
     def rain(self, time=0):
         seasonal_variation = math.sin(2*math.pi*(time+self.rain_wet_season_offset)/self.periodicity)
         rain_noise = numpy.random.lognormal(-3, self.rain_variance)
-        rain_fall= seasonal_variation + rain_noise + self.rain_base
+        rain_fall = seasonal_variation + rain_noise + self.rain_base
         return rain_fall
 
     def sunlight(self, time=0):
@@ -31,4 +38,3 @@ class Weather(Feature):
 
     def temp(self, time=0):
         pass
-

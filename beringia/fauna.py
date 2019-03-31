@@ -1,36 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Example Google style docstrings.
+"""fauna.py
 
-This module demonstrates documentation as specified by the `Google Python
-Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-with a section header and a colon followed by a block of indented text.
-
-Example:
-    Examples can be given using either the ``Example`` or ``Examples``
-    sections. Sections support any reStructuredText formatting, including
-    literal blocks::
-
-        $ python example_google.py
-
-Section breaks are created by resuming unindented text. Section breaks
-are also implicitly created anytime a new section starts.
-
-Attributes:
-    module_level_variable1 (int): Module level variables may be documented in
-        either the ``Attributes`` section of the module docstring, or in an
-        inline docstring immediately following the variable.
-
-        Either form is acceptable, but the two should not be mixed. Choose
-        one convention to document module level variables and be consistent
-        with it.
-
-Todo:
-    * For module TODOs
-    * You have to also use ``sphinx.ext.todo`` extension
-
-.. _Google Python Style Guide:
-   http://google.github.io/styleguide/pyguide.html
-
+.. _Docstring example here:
+   https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 """
 from beringia.feature import Feature
 from beringia.flora import PlantBulk
@@ -38,14 +10,26 @@ from beringia.flora import PlantBulk
 
 class Fauna(Feature):
     def __init__(self, arg):
+        """Fauna class docs
+
+        Args:
+            arg (str):
+        """
         super(Fauna, self).__init__()
         self.arg = arg
 
 
 class AnimalBulk(Fauna):
-    """docstring for animal_bulk"""
-
     def __init__(self, population=0.0, reproduction_rate=0.01, starvation_rate=0.02, feeding_rate=0.5):
+        """AnimalBulk class docs
+
+        Args:
+            population (float):
+            reproduction_rate (float):
+            starvation_rate (float):
+            feeding_rate (float):
+        """
+        super(AnimalBulk, self).__init__()
         self.population = population
         # This is essentially the energy conversion rate. (eg 10 lb grass makes 1 lb beef)
         self.reproduction_rate = reproduction_rate
@@ -54,20 +38,24 @@ class AnimalBulk(Fauna):
         self.ambient_death_rate = 0.05
 
     def zero_correct_pop(self):
+        """zero_correct_pop docs
+        """
         if self.population <= 0:
             self.population = 0.0
 
     def feed(self, target=None):
-        """How to eat.
+        """feed docs
 
         Todo:
             * Be able to feed on multiple prey, and select prey. Either at random, in order of prevalence, or order of
             ease of finding.
             * Eat plants.
             * Eat specific animals.
+            * Cause the stuff that is being fed on are different classes, this should probably be a feeding that is
+            class specific.
 
         Args:
-            target:
+            target (beringia.feature.Feature):
 
         Returns:
             float: The thing that this returns.
@@ -103,12 +91,27 @@ class AnimalBulk(Fauna):
         self.zero_correct_pop()
 
     def depredation(self, predation_rate):
+        """depredation docs
+
+        Args:
+            predation_rate:
+        """
         pass
 
     def migrate(self):
+        """migrate docs
+        """
         pass
 
     def pass_time(self, target=1.0):
+        """pass_time docs
+
+        Todo:
+            * Again this maybe has problems with typing and the feed method.
+
+        Args:
+            target (float):
+        """
         self.feed(target)
         self._ambient_death()
 
@@ -118,6 +121,15 @@ class Invertebrates(AnimalBulk):
             self, population=0.0, reproduction_rate=0.01, starvation_rate=0.25, feeding_rate=0.25,
             fallout_rate=0.001
     ):
+        """Invertebrates class docs
+
+        Args:
+            population (float):
+            reproduction_rate (float):
+            starvation_rate (float):
+            feeding_rate (float):
+            fallout_rate (float):
+        """
         super(Invertebrates, self).__init__(
             population=population, reproduction_rate=reproduction_rate, starvation_rate=starvation_rate,
             feeding_rate=feeding_rate
@@ -125,9 +137,16 @@ class Invertebrates(AnimalBulk):
         self.fallout_rate = fallout_rate
 
     def fallout(self):
+        """fallout docs
+        """
         self.population += self.fallout_rate
 
     def pass_time(self, food=1.0):
+        """pass_time docs
+
+        Args:
+            food (float):
+        """
         self.fallout()
         self.feed(food)
         self.zero_correct_pop()
@@ -136,21 +155,44 @@ class Invertebrates(AnimalBulk):
 
 class InvertDetritivores(Invertebrates):
     def __init__(self, feeding_rate=0.01):
+        """InvertDetritivores class docs
+
+        Args:
+            feeding_rate (float):
+        """
         super(InvertDetritivores, self).__init__(feeding_rate=feeding_rate)
 
 
 class InvertHerbivores(Invertebrates):
     def __init__(self, feeding_rate=0.01):
+        """InvertHerbivores class docs
+
+        Args:
+            feeding_rate (float):
+        """
         super(InvertHerbivores, self).__init__(feeding_rate=feeding_rate)
 
 
 class InvertPredators(Invertebrates):
     def __init__(self, feeding_rate=0.15, fallout_rate=0.0001):
+        """InvertPredators class docs
+
+        Args:
+            feeding_rate (float):
+            fallout_rate (float):
+        """
         super(InvertPredators, self).__init__(feeding_rate=feeding_rate, fallout_rate=fallout_rate)
 
 
 class Vertebrates(AnimalBulk):
     def __init__(self, population=0.0, reproduction_rate=0.01, feeding_rate=0.1):
+        """Vertebrates docs
+
+        Args:
+            population (float):
+            reproduction_rate (float):
+            feeding_rate (float):
+        """
         super(Vertebrates, self).__init__(
             population=population, reproduction_rate=reproduction_rate, feeding_rate=feeding_rate
         )
@@ -185,4 +227,3 @@ class LargePredator(Vertebrates):
 class MediumOmnivore(Vertebrates):
     def __init(self, feeding_rate=0.25):
         super(MediumOmnivore, self).__init__(feeding_rate=feeding_rate)
-
