@@ -3,6 +3,7 @@
 
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
 """
 from beringia.feature import Feature
 from beringia.flora import PlantBulk
@@ -14,6 +15,7 @@ class Fauna(Feature):
 
         Args:
             arg (str):
+
         """
         super(Fauna, self).__init__()
         self.arg = arg
@@ -28,6 +30,7 @@ class AnimalBulk(Fauna):
             reproduction_rate (float):
             starvation_rate (float):
             feeding_rate (float):
+
         """
         super(AnimalBulk, self).__init__()
         self.population = population
@@ -39,6 +42,7 @@ class AnimalBulk(Fauna):
 
     def zero_correct_pop(self):
         """zero_correct_pop docs
+
         """
         if self.population <= 0:
             self.population = 0.0
@@ -59,6 +63,7 @@ class AnimalBulk(Fauna):
 
         Returns:
             float: The thing that this returns.
+
         """
         consumption = self.population * self.feeding_rate
 
@@ -95,6 +100,7 @@ class AnimalBulk(Fauna):
 
         Args:
             predation_rate:
+
         """
         pass
 
@@ -111,6 +117,7 @@ class AnimalBulk(Fauna):
 
         Args:
             target (float):
+
         """
         self.feed(target)
         self._ambient_death()
@@ -129,6 +136,7 @@ class Invertebrates(AnimalBulk):
             starvation_rate (float):
             feeding_rate (float):
             fallout_rate (float):
+
         """
         super(Invertebrates, self).__init__(
             population=population, reproduction_rate=reproduction_rate, starvation_rate=starvation_rate,
@@ -138,6 +146,7 @@ class Invertebrates(AnimalBulk):
 
     def fallout(self):
         """fallout docs
+
         """
         self.population += self.fallout_rate
 
@@ -146,6 +155,7 @@ class Invertebrates(AnimalBulk):
 
         Args:
             food (float):
+
         """
         self.fallout()
         self.feed(food)
@@ -159,6 +169,7 @@ class InvertDetritivores(Invertebrates):
 
         Args:
             feeding_rate (float):
+
         """
         super(InvertDetritivores, self).__init__(feeding_rate=feeding_rate)
 
@@ -169,6 +180,7 @@ class InvertHerbivores(Invertebrates):
 
         Args:
             feeding_rate (float):
+
         """
         super(InvertHerbivores, self).__init__(feeding_rate=feeding_rate)
 
@@ -180,6 +192,7 @@ class InvertPredators(Invertebrates):
         Args:
             feeding_rate (float):
             fallout_rate (float):
+
         """
         super(InvertPredators, self).__init__(feeding_rate=feeding_rate, fallout_rate=fallout_rate)
 
@@ -192,6 +205,7 @@ class Vertebrates(AnimalBulk):
             population (float):
             reproduction_rate (float):
             feeding_rate (float):
+
         """
         super(Vertebrates, self).__init__(
             population=population, reproduction_rate=reproduction_rate, feeding_rate=feeding_rate
@@ -201,29 +215,65 @@ class Vertebrates(AnimalBulk):
 
 class Insectivore(Vertebrates):
     def __init__(self, feeding_rate=0.1):
+        """Insectivore docs
+
+        Args:
+            feeding_rate (float):
+
+        """
         super(Insectivore, self).__init__(feeding_rate=feeding_rate)
 
 
 class SmallHerbivore(Vertebrates):
     def __init__(self, feeding_rate=0.1):
+        """SmallHerbivore docs
+
+        Args:
+            feeding_rate (float):
+
+        """
         super(SmallHerbivore, self).__init__(feeding_rate=feeding_rate)
 
 
 class LargeHerbivore(Vertebrates):
-    def __init(self, feeding_rate=0.2):
+    def __init__(self, feeding_rate=0.2):
+        """LargeHerbivore docs
+
+        Args:
+            feeding_rate (float):
+
+        """
         super(LargeHerbivore, self).__init__(feeding_rate=feeding_rate)
 
 
 class SmallPredator(Vertebrates):
-    def __init(self, feeding_rate=0.2):
+    def __init__(self, feeding_rate=0.2):
+        """SmallPredator docs
+
+        Args:
+            feeding_rate (float):
+
+        """
         super(SmallPredator, self).__init__(feeding_rate=feeding_rate)
 
 
 class LargePredator(Vertebrates):
-    def __init(self, feeding_rate=0.3):
+    def __init__(self, feeding_rate=0.3):
+        """LargePredator docs
+
+        Args:
+            feeding_rate (float):
+
+        """
         super(LargePredator, self).__init__(feeding_rate=feeding_rate)
 
 
 class MediumOmnivore(Vertebrates):
-    def __init(self, feeding_rate=0.25):
+    def __init__(self, feeding_rate=0.25):
+        """MediumOmnivore docs
+
+        Args:
+            feeding_rate (float):
+
+        """
         super(MediumOmnivore, self).__init__(feeding_rate=feeding_rate)

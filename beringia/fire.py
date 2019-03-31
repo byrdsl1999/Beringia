@@ -3,6 +3,7 @@
 
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
 """
 import time
 
@@ -14,6 +15,15 @@ from beringia.constants import STATE_CONSTANTS, COLOR_KEY
 
 class MXRegion(object):
     def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True):
+        """MXRegion class docs
+
+        Args:
+            xdim (int):
+            ydim (int):
+            grid_type (str):
+            colorize (bool):
+
+        """
         self.xdim = xdim
         self.ydim = ydim
         self.grid_type = grid_type
@@ -55,6 +65,15 @@ class MXRegion(object):
             return out
 
     def show_map(self, do_print=True):
+        """show_map docs
+
+        Args:
+            do_print (bool):
+
+        Returns:
+            str:
+
+        """
         if self.grid_type == '2d':
             out = ''
             for x in range(self.xdim):
@@ -73,7 +92,7 @@ class MXRegion(object):
         """Display a visual representation of the self.space attribute with fire state layered on if do_print.
 
         Args:
-            do_print:
+            do_print (bool):
 
         Returns:
             str:
@@ -96,7 +115,8 @@ class MXRegion(object):
         """Move forward one time (or count # of) step(s).
 
         Args:
-            count:
+            count (int):
+
         """
         for _ in range(count):
             self.time += 1
@@ -105,11 +125,12 @@ class MXRegion(object):
             self.spread_fire()
 
     def show_turns(self, count=1, pause=0.5):
-        """show_turns
+        """show_turns docs
 
         Args:
-            count:
-            pause:
+            count (int):
+            pause (float):
+
         """
         for _ in range(count):
             self.pass_time()
@@ -122,7 +143,8 @@ class MXRegion(object):
         Todo:
             * add locales_to_burn
         Args:
-            slow_burn:
+            slow_burn (bool):
+
         """
         locales_on_fire = []
         fires_present = False
@@ -145,14 +167,32 @@ class MXRegion(object):
             time.sleep(0.5)
 
     def view_locale(self, x, y, fire_state=False):
+        """view_locale docs
+
+        Args:
+            x (int):
+            y (int):
+            fire_state (bool):
+
+        Returns:
+            beringia.locale.Locale:
+
+        """
         if fire_state:
-            return self.space.node[(x, y)]['locale'].onFire
+            return self.space.node[(x, y)]['locale'].on_fire
         else:
             return self.space.node[(x, y)]['locale']
 
 
-class Region():
+class Region(object):
     def __init__(self, xdim=10, ydim=10):
+        """Region class docs
+
+        Args:
+            xdim (int):
+            ydim (int):
+
+        """
         self.xdim = xdim
         self.ydim = ydim
         self.space = [[Locale() for x in range(self.xdim)] for y in range(self.ydim)]
@@ -176,6 +216,15 @@ class Region():
         return out
 
     def show_fire_map(self, do_print=True):
+        """show_fire_map docs
+
+        Args:
+            do_print (bool):
+
+        Returns:
+            str:
+
+        """
         out = ''
         for line in self.space:
             for item in line:
@@ -187,6 +236,12 @@ class Region():
             return out
 
     def pass_time(self, count=1):
+        """pass_time docs
+
+        Args:
+            count (int):
+
+        """
         for _ in range(count):
             self.time += 1
             for line in self.space:
@@ -195,9 +250,11 @@ class Region():
             self.spread_fire()
 
     def spread_fire(self):
-        """
+        """spread_fire docs
+
         Todo:
             * add locales_to_burn
+
         """
         locales_on_fire = []
         for x in range(self.xdim):
@@ -222,6 +279,9 @@ class Region():
 
 class Locale(object):
     def __init__(self):
+        """Locale class docs
+
+        """
         self.state = 0
         self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
         self.on_fire = 0
@@ -236,12 +296,21 @@ class Locale(object):
         return str(self.state)
 
     def pass_time(self):
+        """pass_time docs
+
+        """
         if self.on_fire == 1:
             self.burn()
         self.increment_state()
         self.risk_fire()
 
     def increment_state(self):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
         roll = np.random.uniform(0, 1)
         if roll < STATE_CONSTANTS[self.state]['stateIncreaseProb']:
             self.state += 1
@@ -252,6 +321,12 @@ class Locale(object):
         return False
 
     def risk_fire(self):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
         roll = np.random.uniform(0, 1)
         if roll < STATE_CONSTANTS[self.state]['fireStartProb']:
             self.on_fire = 1
@@ -259,6 +334,12 @@ class Locale(object):
         return False
 
     def catch_fire(self):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
         roll = np.random.uniform(0, 1)
         if roll < STATE_CONSTANTS[self.state]['fireSpreadProb']:
             self.on_fire = 1
@@ -266,6 +347,9 @@ class Locale(object):
         return False
 
     def burn(self):
+        """burn docs
+
+        """
         self.state = -1
         self.on_fire = 0
 
@@ -275,8 +359,16 @@ class Species(object):
 
 
 class ABiotics(object):
-    """docstring for ClassName"""
     def __init__(self, soil=1.0, bedrock=1.0, moisture=1.0, nutrients=1.0):
+        """ABiotics class docs
+
+        Args:
+            soil (float):
+            bedrock (float):
+            moisture (float):
+            nutrients (float):
+
+        """
         super(ABiotics, self).__init__()
         self.soil = soil
         self.bedrock = bedrock

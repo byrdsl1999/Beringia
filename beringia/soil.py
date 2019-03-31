@@ -15,6 +15,7 @@ Todo:
         evaporation
         flow
         erosion
+
 """
 import numpy as np
 
@@ -23,6 +24,14 @@ class Geology(object):
     def __init__(
             self, elevation_base=np.random.gamma(5, 0.5), soil_depth=np.random.lognormal(0.25, 0), soil_moisture=0.5
     ):
+        """Geology class docs
+
+        Args:
+            elevation_base (float):
+            soil_depth (float):
+            soil_moisture (float):
+
+        """
         self.elevation_base = elevation_base
         self.soil_depth = soil_depth
         self.soil_moisture = soil_moisture
@@ -30,6 +39,9 @@ class Geology(object):
         self.water_content = self.soil_depth * self.soil_moisture
 
     def recalculate_values(self):
+        """recalculate_values docs
+
+        """
         self.elevation = self.elevation_base+self.soil_depth
         self.water_content = self.soil_depth * self.soil_moisture
 
@@ -37,6 +49,17 @@ class Geology(object):
         return self.elevation_base+self.soil_depth
 
     def erode(self, magnitude=1.0, rate=0.01, slope=0.1):
+        """erode docs
+
+        Args:
+            magnitude (float):
+            rate (float):
+            slope (float):
+
+        Returns:
+            float:
+
+        """
         load = magnitude * rate * slope
         transport = 0.0
         if load > self.soil_depth:
@@ -51,8 +74,17 @@ class Geology(object):
         return transport
 
     def accrete(self, load):
+        """accrete docs
+
+        Args:
+            load (float):
+
+        """
         self.soil_depth += load
         self.recalculate_values()
 
     def runoff(self):
+        """runoff docs
+
+        """
         pass

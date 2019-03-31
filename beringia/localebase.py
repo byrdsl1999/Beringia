@@ -3,6 +3,7 @@
 
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
 """
 import numpy as np
 
@@ -11,10 +12,11 @@ from beringia.constants import STATE_CONSTANTS, FEATURES_SWITCH, PLANT_COLOR_KEY
 
 
 class Locale():
-    """A locale is conceptually a small region which contains a number of biotic and abiotic features which simulate a
-    local ecosystem. It has been conceived of initally as a patch of land about 1 acre in size.
-    """
     def __init__(self):
+        """A locale is conceptually a small region which contains a number of biotic and abiotic features which simulate
+        a local ecosystem. It has been conceived of initally as a patch of land about 1 acre in size.
+
+        """
         self.state = 0
         self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
         self.on_fire = 0
@@ -32,12 +34,21 @@ class Locale():
         return str(self.state)
 
     def pass_time(self):
+        """pass_time doc
+
+        """
         if self.on_fire == 1:
             self.burn()
         self.increment_state()
         self.risk_fire()
 
     def increment_state(self):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
         roll = np.random.uniform(0, 1)
         if roll < STATE_CONSTANTS[self.state]['stateIncreaseProb']:
             self.state += 1
@@ -48,6 +59,12 @@ class Locale():
         return False
 
     def risk_fire(self):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
         roll = np.random.uniform(0, 1)
         if roll < STATE_CONSTANTS[self.state]['fireStartProb']:
             self.on_fire = 1
@@ -55,6 +72,12 @@ class Locale():
         return False
 
     def catch_fire(self):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
         roll = np.random.uniform(0, 1)
         if roll < STATE_CONSTANTS[self.state]['fireSpreadProb']:
             self.on_fire = 1
@@ -62,5 +85,8 @@ class Locale():
         return False
 
     def burn(self):
+        """burn docs
+
+        """
         self.state = -1
         self.on_fire = 0

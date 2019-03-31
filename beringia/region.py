@@ -3,6 +3,7 @@
 
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
 """
 import time
 
@@ -15,6 +16,15 @@ from beringia.constants import STATE_CONSTANTS
 
 class Region(object):
     def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True):
+        """Region class docs
+
+        Args:
+            xdim (int):
+            ydim (int):
+            grid_type (str):
+            colorize (bool):
+
+        """
         self.xdim = xdim
         self.ydim = ydim
         self.grid_type = grid_type
@@ -57,6 +67,15 @@ class Region(object):
             return out
 
     def show_map(self, do_print=True):
+        """show_map docs
+
+        Args:
+            do_print (bool):
+
+        Returns:
+            str:
+
+        """
         if self.grid_type == '2d':
             out = ''
             for x in range(self.xdim):
@@ -75,10 +94,11 @@ class Region(object):
         """Display a visual representation of the self.space attribute with fire state layered on if doPrint.
 
         Args:
-            do_print:
+            do_print (bool):
 
         Returns:
              str:
+
         """
         if self.grid_type == '2d':
             out = ''
@@ -94,6 +114,15 @@ class Region(object):
             print('!!! This grid type does not have this feature implemented !!!')
 
     def show_elevation_map(self, do_print=True):
+        """show_elevation_map docs
+
+        Args:
+            do_print (bool):
+
+        Returns:
+            str:
+
+        """
         if self.grid_type == '2d':
             out = ''
             for x in range(self.xdim):
@@ -111,7 +140,8 @@ class Region(object):
         """Move forward one time(or count # of) step(s).
 
         Args:
-            count:
+            count (int):
+
         """
         for _ in range(count):
             self.time += 1
@@ -133,7 +163,8 @@ class Region(object):
             * add locales_to_burn
 
         Args:
-            slow_burn:
+            slow_burn (bool):
+
         """
         locales_on_fire = []
         fires_present = False
@@ -156,21 +187,43 @@ class Region(object):
             time.sleep(0.5)
 
     def view_locale(self, x, y, fire_state=False):
+        """view_locale docs
+
+        Args:
+            x (int):
+            y (int):
+            fire_state (bool):
+
+        Returns:
+    `       beringia.locale.Locale
+
+        """
         if fire_state:
-            return self.space.node[(x, y)]['locale'].onFire
+            return self.space.node[(x, y)]['locale'].on_fire
         else:
             return self.space.node[(x, y)]['locale']
 
     def view_elevation(self, x, y):
+        """view_elevation docs
+
+        Args:
+            x (int):
+            y (int):
+
+        Returns:
+            int:
+
+        """
         return int(self.space.node[(x, y)]['locale'].geology.elevation//1)
 
     def erode_one(self, node, magnitude=1.0, rate=0.01):
         """This will cause erosion to occur at one location.
 
         Args:
-            node:
-            magnitude:
-            rate:
+            node (networkx.Graph.nodes):
+            magnitude (float):
+            rate (float):
+
         """
         neighboring_nodes = self.space.neighbors(node)
         lowest_neighbor = node
@@ -188,15 +241,36 @@ class Region(object):
         self.space.node[lowest_neighbor]['locale'].geology.accrete(transport)
 
     def erode_all(self, magnitude=1.0, rate=0.01):
+        """erode_all docs
+
+        Args:
+            magnitude (float):
+            rate (float):
+
+        """
         for node in self.space.nodes:
             self.erode_one(node, magnitude, rate)
 
     def randomize_elevation_base(self, mean=5, sd=1.5):
+        """randomize_elevation_base docs
+
+        Args:
+            mean (int):
+            sd (float):
+
+        """
         for node in self.space.nodes():
             self.space.node[node]['locale'].geology.elevation_base = np.random.normal(mean, sd)
             self.space.node[node]['locale'].geology.recalculate_values()
 
     def randomize_elevation_base_cov(self, mean=5, cov=0.4):
+        """randomize_elevation_base_cov docs
+
+        Args:
+            mean (int):
+            cov (float):
+
+        """
         adj_mat = nx.adjacency_matrix(self.space).todense()
         means = [mean for _ in range(self.xdim * self.ydim)]
         elevations = np.random.multivariate_normal(means, (adj_mat*cov))
