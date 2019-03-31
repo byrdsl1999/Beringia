@@ -185,3 +185,4 @@ class LargePredator(Vertebrates):
 class MediumOmnivore(Vertebrates):
     def __init(self, feeding_rate=0.25):
         super(MediumOmnivore, self).__init__(feeding_rate=feeding_rate)
+

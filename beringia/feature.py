@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Example Google style docstrings.
+"""feature.py
 """
 
 
@@ -17,3 +17,4 @@ class Feature(object):
 
     def delete_self(self):
         del self
+
