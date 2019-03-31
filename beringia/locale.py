@@ -1,40 +1,45 @@
+# -*- coding: utf-8 -*-
+"""Example Google style docstrings.
+"""
 import numpy as np
+
 from beringia.soil import geology
+from beringia.constants import COLOR_KEY, STATE_CONSTANTS
 
 FEATURES_SWITCH={
 	'geology': True
 }
 
-class locale():
-	'''A locale is conceptually a small region which contains a number of biotic and abiotic
+
+class Locale(object):
+	"""A locale is conceptually a small region which contains a number of biotic and abiotic
 	features which simulate a local ecosystem. It has been conceived of initally as a patch 
-	of land about 1 acre in size.'''
+	of land about 1 acre in size."""
 	def __init__(self):
 		self.state = 0
-		self.conversion_rates = {0:0.2, 1:0.1, 2:0.15, 3: 0.05, 4:0.1, 5:0}
-		self.onFire=0
+		self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
+		self.on_fire=0
 
 		if FEATURES_SWITCH['geology']: 
 			self.geology = geology()
 
 	def __str__(self):
-		if self.onFire==0:
-			#return (str(self.state))
-			return (COLOR_KEY[self.state])
-		elif self.onFire==1:
-			return ("\033[1;31mf\033[0;37m")
+		if self.on_fire==0:
+			return COLOR_KEY[self.state]
+		elif self.on_fire == 1:
+			return '\033[1;31mf\033[0;37m'
 
 	def __repr__(self):
-		return(str(self.state))
+		return str(self.state)
 
-	def passTime(self):
-		if self.onFire == 1:
+	def pass_time(self):
+		if self.on_fire == 1:
 			self.burn()
-		self.incrementState()
-		self.riskFire()
+		self.increment_state()
+		self.risk_fire()
 
-	def incrementState(self):
-		roll = np.random.uniform(0,1)
+	def increment_state(self):
+		roll = np.random.uniform(0, 1)
 		if roll < STATE_CONSTANTS[self.state]['stateIncreaseProb']:
 			self.state += 1
 			return True
@@ -43,20 +48,20 @@ class locale():
 			return True
 		return False
 
-	def riskFire(self):
-		roll = np.random.uniform(0,1)
+	def risk_fire(self):
+		roll = np.random.uniform(0, 1)
 		if roll < STATE_CONSTANTS[self.state]['fireStartProb']:
-			self.onFire = 1
+			self.on_fire = 1
 			return True
 		return False
 
-	def catchFire(self):
-		roll = np.random.uniform(0,1)
+	def catch_fire(self):
+		roll = np.random.uniform(0, 1)
 		if roll < STATE_CONSTANTS[self.state]['fireSpreadProb']:
-			self.onFire = 1
+			self.on_fire = 1
 			return True
 		return False
 
 	def burn(self):
 		self.state = -1
-		self.onFire =0
+		self.on_fire = 0

@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Example Google style docstrings.
+"""
 import numpy as np
 import networkx as nx
 import time
@@ -22,287 +25,266 @@ COLOR_KEY = {
 	-1:'f'
 }
 
-class nxregion():
-	def __init__(self, xdim=10, ydim=10, gridType='2d', colorize=True):
+
+class MXRegion(object):
+	def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True):
 		self.xdim = xdim
 		self.ydim = ydim
-		self.gridType = gridType
-		if gridType =='2d':
+		self.grid_type = grid_type
+		if grid_type == '2d':
 			self.space = nx.grid_2d_graph(xdim, ydim)
-		elif gridType == 'hex':
+		elif grid_type == 'hex':
 			self.space = nx.hexagonal_lattice_graph(xdim, ydim)
-		elif gridType == 'tri':
+		elif grid_type == 'tri':
 			self.space = nx.triangular_lattice_graph(xdim, ydim)
 		else:
-			#raise exception? default to 2d?
+			# TODO: raise exception? default to 2d?
 			self.space = nx.grid_2d_graph(xdim, ydim)
 		for node in self.space.nodes:
-			self.space.node[node]['locale']=locale()
-		self.conversion_rates = {0:0.2, 1:0.1, 2:0.15, 3: 0.05, 4:0.1, 5:0}
+			self.space.node[node]['locale'] = Locale()
+		self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
 		self.time = 0
-		self.colorize=colorize
+		self.colorize = colorize
 
 	def __repr__(self, verbose=False):
-		if verbose==False or self.gridType != '2d':
-			return('nxregion '+str(self.xdim)+'x'+str(self.ydim))
+		if verbose==False or self.grid_type != '2d':
+			return f'NXRegion {self.xdim}x{self.ydim}'
 		else: 
-			out=""
+			out=''
 			for x in range(self.xdim):
 				for y in range(self.ydim):
-					out += str(self.viewLocale())
-				out +="\n"
+					out += str(self.view_locale())
+				out += '\n'
 			return out
-
 
 	def __str__(self, verbose=False):
-		if verbose==False or self.gridType != '2d':
-			return('nxregion '+str(self.xdim)+'x'+str(self.ydim))
+		if verbose==False or self.grid_type != '2d':
+			return f'NXRegion {self.xdim}x{self.ydim}'
 		else: 
-			out=""
+			out = ''
 			for x in range(self.xdim):
 				for y in range(self.ydim):
-					out += str(self.viewLocale())
-				out +="\n"
+					out += str(self.view_locale())
+				out += '\n'
 			return out
 
-	def showMap(self, doPrint=True):
-		if self.gridType == '2d':
-			out=""
+	def show_map(self, do_print=True):
+		if self.grid_type == '2d':
+			out=''
 			for x in range(self.xdim):
 				for y in range(self.ydim):
-					out += str(self.viewLocale(x,y))
-				out +="\n"
-			out +="\r"
-			if doPrint:
+					out += str(self.view_locale(x, y))
+				out += '\n'
+			out += '\r'
+			if do_print:
 				print(out)
 			else: 
-				return(out)
+				return out
 		else:
 			print('!!! This grid type does not have this feature implemented !!!')
 
+	def show_fire_map(self, do_print=True):
+		"""Display a visual representation of the self.space attribute with fire state layered on if do_print.
 
-	def showFireMap(self, doPrint=True):
-		'''
-		Display a visual representation of the self.space attribute 
-		with fire state layered on if doPrint.
-		'''
-		if self.gridType == '2d':
-			out=""
+		Args:
+			do_print:
+
+		Returns:
+			str:
+
+		"""
+		if self.grid_type == '2d':
+			out = ''
 			for x in range(self.xdim):
 				for y in range(self.ydim):
-					out += str(self.viewLocale(x,y, fireState=True))
-				out +="\n"
-			if doPrint:
+					out += str(self.view_locale(x, y, fire_state=True))
+				out += '\n'
+			if do_print:
 				print(out)
 			else: 
-				return(out)
+				return out
 		else:
 			print('!!! This grid type does not have this feature implemented !!!')
 
+	def pass_time(self, count=1):
+		"""Move forward one time (or count # of) step(s).
 
-	def passTime(self, count = 1):
-		'''
-		Move forward one time(or count # of) step(s).
-		'''
-
+		Args:
+			count:
+		"""
 		for _ in range(count):
 			self.time+=1
 			for node in self.space.nodes:
-				self.space.node[node]['locale'].passTime()
-			self.spreadFire()
+				self.space.node[node]['locale'].pass_time()
+			self.spread_fire()
 
-	def showTurns(self, count= 1, pause=0.5):
+	def show_turns(self, count=1, pause=0.5):
+		"""show_turns
+
+		Args:
+			count:
+			pause:
+		"""
 		for _ in range(count):
-			self.passTime()
-			self.showMap()
+			self.pass_time()
+			self.show_map()
 			time.sleep(pause)
 
-	def spreadFire(self, slowBurn=False):
-		'''
-		Scan locales for fire, and if present, cause fire to spread to 
-		neighboring regions.
-		'''
-		localesOnFire = []
-		localesToBurn = {}
-		firesPresent = False
+	def spread_fire(self, slow_burn=False):
+		"""Scan locales for fire, and if present, cause fire to spread to neighboring regions.
+
+		Args:
+			slow_burn:
+		"""
+		locales_on_fire = []
+		locales_to_burn = {}
+		fires_present = False
 		for node in self.space.nodes:
 			if self.space.node[node]['locale'].onFire == 1: 
-				localesOnFire.append(node)
-		if localesOnFire: firesPresent = True
-		for locale_ in localesOnFire:
-			neighboringNodes = self.space.neighbors(locale_)
-			for node in neighboringNodes:
+				locales_on_fire.append(node)
+		if locales_on_fire: fires_present = True
+		for locale_ in locales_on_fire:
+			neighboring_nodes = self.space.neighbors(locale_)
+			for node in neighboring_nodes:
 				if self.space.node[node]['locale'].onFire==0:
-					if self.space.node[node]['locale'].catchFire():
-						localesOnFire.append(node)
-						if slowBurn==True: 
-							self.showMap()
+					if self.space.node[node]['locale'].catch_fire():
+						locales_on_fire.append(node)
+						if slow_burn == True:
+							self.show_map()
 							time.sleep(0.15)
-		if firesPresent: 
-			self.showMap()
+		if fires_present:
+			self.show_map()
 			time.sleep(0.5)
 
-	def viewLocale(self, x, y, fireState=False):
-		if fireState == False:
-			return self.space.node[(x,y)]['locale']
-		elif fireState == True:
-			return self.space.node[(x,y)]['locale'].onFire
+	def view_locale(self, x, y, fire_state=False):
+		if fire_state:
+			return self.space.node[(x, y)]['locale'].onFire
+		else:
+			return self.space.node[(x, y)]['locale']
 
 
-
-
-class region():
-	
+class Region():
 	def __init__(self, xdim=10, ydim=10):
 		self.xdim = xdim
 		self.ydim = ydim
-		self.space = [[locale() for x in range(self.xdim)] for y in range(self.ydim)]
+		self.space = [[Locale() for x in range(self.xdim)] for y in range(self.ydim)]
 		self.conversion_rates = {0:0.2, 1:0.1, 2:0.15, 3: 0.05, 4:0.1, 5:0}
 		self.time = 0
 
 	def __repr__(self):
-		out=""
+		out = ''
 		for line in self.space:
 			for item in line:
 				out += str(item)
-			out +="\n"
+			out += '\n'
 		return out
 
 	def __str__(self):
-		out=""
+		out = ''
 		for line in self.space:
 			for item in line:
 				out += str(item)
-			out +="\n"
+			out += '\n'
 		return out
 
-	def showFireMap(self, doPrint=True):
-		out=""
+	def show_fire_map(self, do_print=True):
+		out = ''
 		for line in self.space:
 			for item in line:
-				out += str(item.onFire)
-			out +="\n"
-		if doPrint: print(out)
+				out += str(item.on_fire)
+			out += '\n'
+		if do_print: print(out)
 		else: return out
 
-	def passTime(self, count = 1):
+	def pass_time(self, count = 1):
 		for _ in range(count):
-			self.time+=1
+			self.time += 1
 			for line in self.space:
-				for eachLocale in line:
-					eachLocale.passTime()
-			self.spreadFire()
+				for each_locale in line:
+					each_locale.pass_time()
+			self.spread_fire()
 
-
-	def spreadFire(self):
-		localesOnFire = []
-		localesToBurn = {}
+	def spread_fire(self):
+		locales_on_fire = []
+		locales_to_burn = {}
 		for x in range(self.xdim):
 			for y in range(self.ydim):
-				if self.space[x][y].onFire == 1:
-					localesOnFire.append([x,y])
+				if self.space[x][y].on_fire == 1:
+					locales_on_fire.append([x,y])
 
-		for locale_ in localesOnFire:
-			if locale_[0]-1 >= 0 and self.space[locale_[0]-1][locale_[1]].onFire==0:
-				if self.space[locale_[0]-1][locale_[1]].catchFire():
-					localesOnFire.append([locale_[0]-1, locale_[1]])
-			if locale_[0]+1 < self.xdim and self.space[locale_[0]+1][locale_[1]].onFire==0:
-				if self.space[locale_[0]+1][locale_[1]].catchFire():
-					localesOnFire.append([locale_[0]+1, locale_[1]])
-			if locale_[1]-1 >= 0 and self.space[locale_[0]][locale_[1]-1].onFire==0:
-				if self.space[locale_[0]][locale_[1]-1].catchFire():
-					localesOnFire.append([locale_[0], locale_[1]-1])
-			if locale_[1]+1 < self.ydim and self.space[locale_[0]][locale_[1]+1].onFire==0:
-				if self.space[locale_[0]][locale_[1]+1].catchFire():
-					localesOnFire.append([locale_[0]-1, locale_[1]+1])
+		for locale_ in locales_on_fire:
+			if locale_[0]-1 >= 0 and self.space[locale_[0]-1][locale_[1]].on_fire == 0:
+				if self.space[locale_[0]-1][locale_[1]].catch_fire():
+					locales_on_fire.append([locale_[0]-1, locale_[1]])
+			if locale_[0]+1 < self.xdim and self.space[locale_[0]+1][locale_[1]].on_fire == 0:
+				if self.space[locale_[0]+1][locale_[1]].catch_fire():
+					locales_on_fire.append([locale_[0]+1, locale_[1]])
+			if locale_[1]-1 >= 0 and self.space[locale_[0]][locale_[1]-1].on_fire == 0:
+				if self.space[locale_[0]][locale_[1]-1].catch_fire():
+					locales_on_fire.append([locale_[0], locale_[1]-1])
+			if locale_[1]+1 < self.ydim and self.space[locale_[0]][locale_[1]+1].on_fire == 0:
+				if self.space[locale_[0]][locale_[1]+1].catch_fire():
+					locales_on_fire.append([locale_[0]-1, locale_[1]+1])
 
 
-
-class locale():
+class Locale(object):
 	def __init__(self):
 		self.state = 0
-		self.conversion_rates = {0:0.2, 1:0.1, 2:0.15, 3: 0.05, 4:0.1, 5:0}
-		self.onFire=0
+		self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
+		self.on_fire = 0
 
 	def __str__(self):
-		if self.onFire==0:
-			#return (str(self.state))
-			return (COLOR_KEY[self.state])
-		elif self.onFire==1:
-			return ("\033[1;31mf\033[0;37m")
+		if self.on_fire == 0:
+			return COLOR_KEY[self.state]
+		elif self.on_fire == 1:
+			return '\033[1;31mf\033[0;37m'
 
 	def __repr__(self):
-		return(str(self.state))
+		return str(self.state)
 
-	def passTime(self):
-		if self.onFire == 1:
+	def pass_time(self):
+		if self.on_fire == 1:
 			self.burn()
-		self.incrementState()
-		self.riskFire()
+		self.increment_state()
+		self.risk_fire()
 
-	def incrementState(self):
-		roll = np.random.uniform(0,1)
+	def increment_state(self):
+		roll = np.random.uniform(0, 1)
 		if roll < STATE_CONSTANTS[self.state]['stateIncreaseProb']:
 			self.state += 1
 			return True
-		elif roll > 1-STATE_CONSTANTS[self.state]['stateDecreaseProb']:
+		elif roll > 1 - STATE_CONSTANTS[self.state]['stateDecreaseProb']:
 			self.state -= 1
 			return True
 		return False
 
-	def riskFire(self):
-		roll = np.random.uniform(0,1)
+	def risk_fire(self):
+		roll = np.random.uniform(0, 1)
 		if roll < STATE_CONSTANTS[self.state]['fireStartProb']:
-			self.onFire = 1
+			self.on_fire = 1
 			return True
 		return False
 
-	def catchFire(self):
-		roll = np.random.uniform(0,1)
+	def catch_fire(self):
+		roll = np.random.uniform(0, 1)
 		if roll < STATE_CONSTANTS[self.state]['fireSpreadProb']:
-			self.onFire = 1
+			self.on_fire = 1
 			return True
 		return False
 
 	def burn(self):
 		self.state = -1
-		self.onFire =0
+		self.on_fire = 0
 
 
-class feature(object):
-	"""This is a generic class that defines features of locale."""
-	def __init__(self, location=None):
-		self.location=location
-
-	def hasLocation(self):
-		if self.locale == None:
-			return False
-		else:
-			return True
-
-	def deleteSelf(self):
-		del self
-
-class flora(feature):
-	"""Flora is housed within a locale, and keeps track of which species are present and in what quantities."""
-	def __init__(self):
-		super(feature, self).__init__()
-
-
-class species(): 
+class Species(object):
 	pass
 
 
-class fauna(feature):
-	"""docstring for ClassName"""
-	def __init__(self):
-		super(feature, self).__init__()
-
-		
-class abiotics(object):
+class ABiotics(object):
 	"""docstring for ClassName"""
 	def __init__(self, soil=1.0, bedrock=1.0, moisture=1.0, nutrients=1.0):
-		super(ClassName, self).__init__()
+		super(ABiotics, self).__init__()
 		self.soil=soil
 		self.bedrock=bedrock
 		self.moisture=moisture

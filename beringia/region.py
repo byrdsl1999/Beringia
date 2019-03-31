@@ -1,17 +1,22 @@
+# -*- coding: utf-8 -*-
+"""Example Google style docstrings.
+"""
+import time
+
 import numpy as np
 import networkx as nx
-import time
-from beringia.localebase import locale
+
+from beringia.localebase import Locale
 from beringia.constants import *
 
-STATE_CONSTANTS ={
+STATE_CONSTANTS = {
 	0: {'stateIncreaseProb': 0.20,	'stateDecreaseProb': 0, 	'fireStartProb': 0.000,	'fireSpreadProb': 0.000},
 	1: {'stateIncreaseProb': 0.10,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.0005,	'fireSpreadProb': 0.100},
 	2: {'stateIncreaseProb': 0.15,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.0005,	'fireSpreadProb': 0.200},
 	3: {'stateIncreaseProb': 0.10,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.0005,	'fireSpreadProb': 0.300},
 	4: {'stateIncreaseProb': 0.10,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.0005,	'fireSpreadProb': 0.450},
 	5: {'stateIncreaseProb': 0.00,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.0005,	'fireSpreadProb': 0.700},
-	-1:{'stateIncreaseProb': 1.00,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.000,	'fireSpreadProb': 0.000}
+	-1: {'stateIncreaseProb': 1.00,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.000,	'fireSpreadProb': 0.000}
 	}
 
 PLANT_COLOR_KEY = {
@@ -21,34 +26,34 @@ PLANT_COLOR_KEY = {
 	3: '\033[1;30;48;5;46m3\033[0;39m',
 	4: '\033[1;30;48;5;34m4\033[0;39m',
 	5: '\033[1;30;48;5;2m5\033[0;39m',
-	-1:'f'
+	-1: 'f'
 }
 
 
-class region():
+class Region():
 	def __init__(self, xdim=10, ydim=10, gridType='2d', colorize=True):
 		self.xdim = xdim
 		self.ydim = ydim
 		self.gridType = gridType
-		if gridType =='2d':
+		if gridType == '2d':
 			self.space = nx.grid_2d_graph(xdim, ydim)
 		elif gridType == 'hex':
 			self.space = nx.hexagonal_lattice_graph(xdim, ydim)
 		elif gridType == 'tri':
 			self.space = nx.triangular_lattice_graph(xdim, ydim)
 		else:
-			#raise exception? default to 2d?
+			# TODO: raise exception? default to 2d?
 			self.space = nx.grid_2d_graph(xdim, ydim)
 		for node in self.space.nodes:
-			self.space.node[node]['locale']=locale()
-		self.conversion_rates = {0:0.2, 1:0.1, 2:0.15, 3: 0.05, 4:0.1, 5:0}
+			self.space.node[node]['locale'] = Locale()
+		self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
 		self.time = 0
 		self.colorize=colorize
 		self.constants=STATE_CONSTANTS
 
 	def __repr__(self, verbose=False):
-		if verbose==False or self.gridType != '2d':
-			return('region '+str(self.xdim)+'x'+str(self.ydim))
+		if verbose == False or self.gridType != '2d':
+			return f'region {self.xdim}x{self.ydim}'
 		else: 
 			out=""
 			for x in range(self.xdim):
@@ -126,7 +131,7 @@ class region():
 		for _ in range(count):
 			self.time+=1
 			for node in self.space.nodes:
-				self.space.node[node]['locale'].passTime()
+				self.space.node[node]['locale'].pass_time()
 			self.spreadFire()
 			self.erode_all(magnitude=0.1)
 
@@ -152,7 +157,7 @@ class region():
 			neighboringNodes = self.space.neighbors(locale_)
 			for node in neighboringNodes:
 				if self.space.node[node]['locale'].onFire==0:
-					if self.space.node[node]['locale'].catchFire():
+					if self.space.node[node]['locale'].catch_fire():
 						localesOnFire.append(node)
 						if slowBurn==True: 
 							self.showMap()

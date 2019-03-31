@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Example Google style docstrings.
+"""
 STATE_CONSTANTS ={
 	0: {'stateIncreaseProb': 0.20,	'stateDecreaseProb': 0, 	'fireStartProb': 0.000,	'fireSpreadProb': 0.000},
 	1: {'stateIncreaseProb': 0.10,	'stateDecreaseProb': 0.00, 	'fireStartProb': 0.0005,	'fireSpreadProb': 0.100},
@@ -16,4 +19,8 @@ PLANT_COLOR_KEY = {
 	4: '\033[1;30;48;5;34m4\033[0;39m',
 	5: '\033[1;30;48;5;2m5\033[0;39m',
 	-1:'f'
+}
+
+COLOR_KEY = {
+	0: ''
 }
