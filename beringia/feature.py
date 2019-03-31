@@ -8,13 +8,13 @@
 
 
 class Feature(object):
+    """This is a generic class that defines features of locale.
+
+    Args:
+        location (beringia.locale.Locale):
+
+    """
     def __init__(self, location=None):
-        """This is a generic class that defines features of locale.
-
-        Args:
-            location (beringia.locale.Locale):
-
-        """
         self.location = location
 
     def has_location(self):

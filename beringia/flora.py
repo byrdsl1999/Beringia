@@ -11,23 +11,23 @@ from beringia.feature import Feature
 
 
 class Flora(Feature):
-    def __init__(self):
-        """Flora is housed within a locale, and keeps track of which species are present and in what quantities.
+    """Flora is housed within a locale, and keeps track of which species are present and in what quantities.
 
-        """
+    """
+    def __init__(self):
         super(Feature, self).__init__()
 
 
 class PlantBulk(Flora):
+    """PlantBulk class docs
+
+    Args:
+        population (float):
+        growth_rate (float):
+        feeding_rate (float):
+
+    """
     def __init__(self, population=0.01, growth_rate=0.01, feeding_rate=0.5):
-        """PlantBulk class docs
-
-        Args:
-            population (float):
-            growth_rate (float):
-            feeding_rate (float):
-
-        """
         super(PlantBulk, self).__init__()
         self.population = population
         self.max_pop = 1.0
@@ -44,6 +44,7 @@ class PlantBulk(Flora):
         maths:
             Ecological growth should follow a logistic growth function. The slope of which is defined by the equation:
                 dP/dt = r * P * (1 - P/K)
+
             where P = Population, r = growth rate, and K = carrying capacity.
 
         Args:
@@ -83,48 +84,48 @@ class PlantBulk(Flora):
 
 
 class Mosses(PlantBulk):
-    def __init__(self):
-        """Mosses class docs
+    """Mosses class docs
 
-        """
+    """
+    def __init__(self):
         super(Mosses, self).__init__()
 
 
 class Grasses(PlantBulk):
-    def __init__(self):
-        """Grasses class docs
+    """Grasses class docs
 
-        """
+    """
+    def __init__(self):
         super(Grasses, self).__init__()
 
 
 class Perennials(PlantBulk):
-    def __init__(self):
-        """Perennials class docs
+    """Perennials class docs
 
-        """
+    """
+    def __init__(self):
         super(Perennials, self).__init__()
 
 
 class Shrubs(PlantBulk):
-    def __init__(self):
-        """Shrubs class docs
+    """Shrubs class docs
 
-        """
+    """
+    def __init__(self):
         super(Shrubs, self).__init__()
 
 
 class SoftWoods(PlantBulk):
-    def __init__(self):
-        """SoftWoods class docs
+    """SoftWoods class docs
 
-        """
+    """
+    def __init__(self):
         super(SoftWoods, self).__init__()
 
 
 class HardWoods(PlantBulk):
-    def __init__(self):
-        """HardWoods class docs
+    """HardWoods class docs
 
-        """
+    """
+    def __init__(self):
         super(HardWoods, self).__init__()

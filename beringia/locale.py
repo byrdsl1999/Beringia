@@ -12,11 +12,11 @@ from beringia.constants import COLOR_KEY, STATE_CONSTANTS, FEATURES_SWITCH
 
 
 class Locale(object):
-    def __init__(self):
-        """A locale is conceptually a small region which contains a number of biotic and abiotic features which simulate
-        a local ecosystem. It has been conceived of initially as a patch of land about 1 acre in size.
+    """A locale is conceptually a small region which contains a number of biotic and abiotic features which simulate
+    a local ecosystem. It has been conceived of initially as a patch of land about 1 acre in size.
 
-        """
+    """
+    def __init__(self):
         self.state = 0
         self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
         self.on_fire = 0

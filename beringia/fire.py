@@ -14,16 +14,16 @@ from beringia.constants import STATE_CONSTANTS, COLOR_KEY
 
 
 class MXRegion(object):
+    """MXRegion class docs
+
+    Args:
+        xdim (int):
+        ydim (int):
+        grid_type (str):
+        colorize (bool):
+
+    """
     def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True):
-        """MXRegion class docs
-
-        Args:
-            xdim (int):
-            ydim (int):
-            grid_type (str):
-            colorize (bool):
-
-        """
         self.xdim = xdim
         self.ydim = ydim
         self.grid_type = grid_type
@@ -185,14 +185,14 @@ class MXRegion(object):
 
 
 class Region(object):
+    """Region class docs
+
+    Args:
+        xdim (int):
+        ydim (int):
+
+    """
     def __init__(self, xdim=10, ydim=10):
-        """Region class docs
-
-        Args:
-            xdim (int):
-            ydim (int):
-
-        """
         self.xdim = xdim
         self.ydim = ydim
         self.space = [[Locale() for x in range(self.xdim)] for y in range(self.ydim)]
@@ -278,10 +278,10 @@ class Region(object):
 
 
 class Locale(object):
-    def __init__(self):
-        """Locale class docs
+    """Locale class docs
 
-        """
+    """
+    def __init__(self):
         self.state = 0
         self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
         self.on_fire = 0
@@ -355,20 +355,24 @@ class Locale(object):
 
 
 class Species(object):
-    pass
+    """Species class docs
+
+    """
+    def __init__(self):
+        pass
 
 
 class ABiotics(object):
+    """ABiotics class docs
+
+    Args:
+        soil (float):
+        bedrock (float):
+        moisture (float):
+        nutrients (float):
+
+    """
     def __init__(self, soil=1.0, bedrock=1.0, moisture=1.0, nutrients=1.0):
-        """ABiotics class docs
-
-        Args:
-            soil (float):
-            bedrock (float):
-            moisture (float):
-            nutrients (float):
-
-        """
         super(ABiotics, self).__init__()
         self.soil = soil
         self.bedrock = bedrock

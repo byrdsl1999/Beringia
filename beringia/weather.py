@@ -13,13 +13,13 @@ from beringia.feature import Feature
 
 
 class Weather(Feature):
+    """Weather class docs
+
+    Args:
+        periodicity (int):
+
+    """
     def __init__(self, periodicity=12):
-        """Weather class docs
-
-        Args:
-            periodicity (int):
-
-        """
         super(Weather, self).__init__()
         self.periodicity = periodicity
         self.rain_base = 0.5

@@ -21,17 +21,17 @@ import numpy as np
 
 
 class Geology(object):
+    """Geology class docs
+
+    Args:
+        elevation_base (float):
+        soil_depth (float):
+        soil_moisture (float):
+
+    """
     def __init__(
             self, elevation_base=np.random.gamma(5, 0.5), soil_depth=np.random.lognormal(0.25, 0), soil_moisture=0.5
     ):
-        """Geology class docs
-
-        Args:
-            elevation_base (float):
-            soil_depth (float):
-            soil_moisture (float):
-
-        """
         self.elevation_base = elevation_base
         self.soil_depth = soil_depth
         self.soil_moisture = soil_moisture

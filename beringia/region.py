@@ -15,16 +15,16 @@ from beringia.constants import STATE_CONSTANTS
 
 
 class Region(object):
+    """Region class docs
+
+    Args:
+        xdim (int):
+        ydim (int):
+        grid_type (str):
+        colorize (bool):
+
+    """
     def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True):
-        """Region class docs
-
-        Args:
-            xdim (int):
-            ydim (int):
-            grid_type (str):
-            colorize (bool):
-
-        """
         self.xdim = xdim
         self.ydim = ydim
         self.grid_type = grid_type
@@ -195,7 +195,7 @@ class Region(object):
             fire_state (bool):
 
         Returns:
-    `       beringia.locale.Locale
+            beringia.locale.Locale:
 
         """
         if fire_state:
