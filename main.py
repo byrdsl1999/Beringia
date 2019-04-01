@@ -1,65 +1,74 @@
-import numpy as np
-import networkx as nx
-import time
-import region as reg
+# -*- coding: utf-8 -*-
+"""main.py
 
-class session(object):
-	"""docstring for ClassName"""
-	def __init__(self):
-		self.region = None
-		self.main()
-		self.xdim=10
-		self.ydim=10
+.. _Docstring example here:
+   https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
-	def main(self):
-		self.set_dimensions()
-		self.region=reg.region(self.xdim, self.ydim)
-		while True:
-			inp = input("enter command('h' for help):")
-			if inp in ['exit', 'e']: 
-				break
-			else: 
-				self.parser(inp)
-
-	def parser(self, inp):
-		inp = str(inp).lower()
-		if inp in ['h', 'help',]:
-			self.help()
-		if inp in ['param', 'parameters']:
-			self.set_parameters()
-		if inp in ['reset']:
-			self.reset()
-		if inp in ['e', 'exit']:
-			self.exit()
-		if inp in ['run', 'r']:
-			self.run()
-		if inp in ['elev', 'elevation']:
-			self.show_elevation()
+"""
+import beringia.region as reg
 
 
-	def help(self):
-		print("e: exit \nrun: run \nh: help\nreset: reset with a new region.\nelev: Show Elevation Map")
+class Session(object):
+    """docstring for Session
 
-	def set_parameters(self):
-		print("This function is not yet implemented.")
+    """
+    def __init__(self):
+        self.region = None
+        self.main()
+        self.xdim = 10
+        self.ydim = 10
 
-	def set_dimensions(self):
-		self.xdim = int(input("x dimension(10-30 ideal)?"))
-		self.ydim = int(input("y dimension?"))
+    def main(self):
+        self.set_dimensions()
+        self.region = reg.Region(self.xdim, self.ydim)
+        while True:
+            inp = input("enter command('h' for help):")
+            if inp in ['exit', 'e']:
+                break
+            else:
+                self.parser(inp)
 
-	def reset(self):
-		self.set_dimensions()
-		self.region=reg.region(self.xdim, self.ydim)
+    def parser(self, inp):
+        inp = str(inp).lower()
+        if inp in ['h', 'help']:
+            self.help()
+        if inp in ['param', 'parameters']:
+            self.set_parameters()
+        if inp in ['reset']:
+            self.reset()
+        if inp in ['e', 'exit']:
+            self.exit()
+        if inp in ['run', 'r']:
+            self.run()
+        if inp in ['elev', 'elevation']:
+            self.show_elevation()
 
-	def run(self):
-		turns = int(input("how many turns?"))
-		self.region.showTurns(turns)
+    @classmethod
+    def help(self):
+        print("e: exit \nrun: run \nh: help\nreset: reset with a new region.\nelev: Show Elevation Map")
 
-	def show_elevation(self):
-		self.region.showElevationMap()
+    @classmethod
+    def set_parameters(self):
+        print("This function is not yet implemented.")
 
-	def exit(self):
-		pass
+    def set_dimensions(self):
+        self.xdim = int(input("x dimension(10-30 ideal)?"))
+        self.ydim = int(input("y dimension?"))
 
-if __name__ == "__main__": 
-	session()
+    def reset(self):
+        self.set_dimensions()
+        self.region = reg.Region(self.xdim, self.ydim)
+
+    def run(self):
+        turns = int(input("how many turns?"))
+        self.region.showTurns(turns)
+
+    def show_elevation(self):
+        self.region.showElevationMap()
+
+    def exit(self):
+        pass
+
+
+if __name__ == "__main__":
+    Session()
