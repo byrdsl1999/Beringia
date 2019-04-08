@@ -78,8 +78,8 @@ class Region(object):
         """
         if self.grid_type == '2d':
             out = ''
-            for x in range(self.xdim):
-                for y in range(self.ydim):
+            for y in range(self.ydim):
+                for x in range(self.xdim):
                     out += str(self.view_locale(x, y))
                 out += '\n'
             out += '\r'
@@ -113,7 +113,7 @@ class Region(object):
         else:
             print('!!! This grid type does not have this feature implemented !!!')
 
-    def show_elevation_map(self, do_print=True):
+    def __hash__(self, do_print=True):
         """show_elevation_map docs
 
         Args:

@@ -61,10 +61,10 @@ class Session(object):
 
     def run(self):
         turns = int(input("how many turns?"))
-        self.region.showTurns(turns)
+        self.region.show_turns(turns)
 
     def show_elevation(self):
-        self.region.showElevationMap()
+        self.region.show_elevation_map()
 
     def exit(self):
         pass
