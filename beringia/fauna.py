@@ -1,6 +1,33 @@
 # -*- coding: utf-8 -*-
 """fauna.py
 
+    TODO:
+        Fauna will fall into two categories, bulk and unit fauna.
+        Bulk Fauna:
+            Not individuals, but instead aggregate masses of creatures.
+            They will be tracked as non-discrete populations.
+            Prototypical of this will be insects.
+        Unit Fauna:
+            These will be (potentially) roving creatures.
+            These should ideally be tracked individually.
+            Behaviors:
+                Food detection
+                Seeking food.
+                following prey.
+                evading predators
+                mating
+                keeping home ranges
+                herb behavior(mobile home range?).
+        Food Web:
+            2 types:
+                A simple food chain:
+                    Plants->Herbivores->Carnivores
+                A proper food web:
+        Beavers:
+            pond building
+
+
+
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 

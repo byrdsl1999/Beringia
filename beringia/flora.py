@@ -1,22 +1,301 @@
 # -*- coding: utf-8 -*-
 """flora.py
 
+    TODO:
+        A set of flora systems with evolving complexity.
+            X   System 0:
+                A basic system with either plant or no plant, then graduates with some probability.
+                This is similar to a basic 'matchstick sim'
+            X System 1:
+                A system with a set number of levels(as presently exists)
+                level 1(grasses) graduates to level 2(small shrubs) to 3(large shrubs) etc.
+                graduation will occur either as a random probability, or after a set period of time.
+            X System 2:
+                A system with one continunous flora variable.
+                the variable increases with time.
+            System 3(see https://en.wikipedia.org/wiki/Ecological_succession#/media/File:Forest_succession_depicted_over_time.png):
+                A system with several guilds of plants, with shifting dominance.
+                Mechanism is probably going to be some form of inhibtion/facilitation.
+            System 4:
+                Similar to above with individual plant species as members of guilds.
+        Introduce:
+            Plant water requirements
+            Plant nutrient requirements
+            Plant Stress
+        This is all based on a temperate forest model. I'd really like to get a nice savannah system working.
+
+
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
 """
 from scipy import stats
+import numpy as np
 
 from beringia.feature import Feature
 
 
 class Flora(Feature):
-    """Flora is housed within a locale, and keeps track of which species are present and in what quantities.
+    """
+    This is the base flora class, which includes all the functions necessary. This particular version does not work
+    well. Instead, use one of the other flora systems.
+
+    Flora is housed within a locale, and keeps track of which species are present and in what quantities.
 
     """
     def __init__(self):
         super(Feature, self).__init__()
+        self.state = 0
+        self.on_fire = 0
 
+    def increment_state(self):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
+        self.state+=1
+
+    def risk_fire(self):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < 0.1:
+            self.on_fire = 1
+            return True
+        return False
+
+    def catch_fire(self):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < 0.1:
+            self.on_fire = 1
+            return True
+        return False
+
+    def burn(self):
+        """burn docs
+
+        """
+        self.state -= 1
+        self.on_fire = 0
+
+class FloraSystem0(Flora):
+    """The most basic plant system that tracks simply Plants/No Plants state at each location.
+    """
+
+    def __init__(self):
+        super(Flora, self).__init__()
+        self.state = 0
+        self.on_fire = 0
+        self.STATE_CONSTANTS = {
+            0: {'stateIncreaseProb': 0.20, 'stateDecreaseProb': 0, 'fireStartProb': 0.000, 'fireSpreadProb': 0.000},
+            1: {'stateIncreaseProb': 0.00, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0005, 'fireSpreadProb': 0.500},
+            -1: {'stateIncreaseProb': 1.00, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.000,
+                 'fireSpreadProb': 0.000}
+        }
+
+
+    def increment_state(self):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.STATE_CONSTANTS[self.state]['stateIncreaseProb']:
+            self.state += 1
+            return True
+        elif roll > 1 - self.STATE_CONSTANTS[self.state]['stateDecreaseProb']:
+            self.state -= 1
+            return True
+        return False
+
+
+    def risk_fire(self):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.STATE_CONSTANTS[self.state]['fireStartProb']:
+            self.on_fire = 1
+            return True
+        return False
+
+
+    def catch_fire(self):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.STATE_CONSTANTS[self.state]['fireSpreadProb']:
+            self.on_fire = 1
+            return True
+        return False
+
+
+    def burn(self):
+        """burn docs
+
+        """
+        self.state = -1
+        self.on_fire = 0
+
+
+class FloraSystem1(Flora):
+    """A system that categorizes several increasing states, and increments them forward.
+    """
+    def __init__(self):
+        super(Flora, self).__init__()
+        self.state = 0
+        self.on_fire = 0
+        self.STATE_CONSTANTS = {
+            0: {'stateIncreaseProb': 0.20, 'stateDecreaseProb': 0, 'fireStartProb': 0.000, 'fireSpreadProb': 0.000},
+            1: {'stateIncreaseProb': 0.10, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0005, 'fireSpreadProb': 0.100},
+            2: {'stateIncreaseProb': 0.15, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0005, 'fireSpreadProb': 0.200},
+            3: {'stateIncreaseProb': 0.10, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0005, 'fireSpreadProb': 0.300},
+            4: {'stateIncreaseProb': 0.10, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0005, 'fireSpreadProb': 0.450},
+            5: {'stateIncreaseProb': 0.00, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0005, 'fireSpreadProb': 0.700},
+            -1: {'stateIncreaseProb': 1.00, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.000, 'fireSpreadProb': 0.000}
+            }
+
+
+    def increment_state(self):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.STATE_CONSTANTS[self.state]['stateIncreaseProb']:
+            self.state += 1
+            return True
+        elif roll > 1 - self.STATE_CONSTANTS[self.state]['stateDecreaseProb']:
+            self.state -= 1
+            return True
+        return False
+
+
+    def risk_fire(self):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.STATE_CONSTANTS[self.state]['fireStartProb']:
+            self.on_fire = 1
+            return True
+        return False
+
+
+    def catch_fire(self):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.STATE_CONSTANTS[self.state]['fireSpreadProb']:
+            self.on_fire = 1
+            return True
+        return False
+
+
+    def burn(self):
+        """burn docs
+
+        """
+        self.state = -1
+        self.on_fire = 0
+
+
+class FloraSystem2(Flora):
+    """
+    This is the base flora class, which includes all the functions necessary. This particular version does not work
+    well. Instead, use one of the other flora systems.
+
+    Flora is housed within a locale, and keeps track of which species are present and in what quantities.
+
+    """
+
+    def __init__(self):
+        super(Flora, self).__init__()
+        self.state = 0.0  #State exists from 0-9 continuous, but should be rounded for display.
+        self.on_fire = 0
+        self.random_growth = False
+
+    def increment_state(self, rate = 0.05, max= 9.9999):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
+        if not self.random_growth:
+            if self.state <= max:
+                self.state += rate
+            else:
+                self.state = max
+        elif self.random_growth:
+            if self.state <= max:
+                self.state += np.random.normal(rate, rate/5)
+            else:
+                self.state = max
+
+
+    def risk_fire(self, fire_risk=0.001):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < fire_risk * self.state:
+            self.on_fire = 1
+            return True
+        return False
+
+    def catch_fire(self, fire_spread_prob= 0.07):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.state * fire_spread_prob:
+            self.on_fire = 1
+            return True
+        return False
+
+    def burn(self):
+        """burn docs
+
+        """
+        self.state =0.0
+        self.on_fire = 0
 
 class PlantBulk(Flora):
     """PlantBulk class docs

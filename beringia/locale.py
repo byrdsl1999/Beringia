@@ -4,6 +4,11 @@
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
+    TODO:
+        Additional Features:
+            Make fire external to region.
+        Add edge locales.
+
 """
 import numpy as np
 
@@ -90,3 +95,11 @@ class Locale(object):
         """
         self.state = -1
         self.on_fire = 0
+
+
+class Border(Locale):
+    def __init__(self):
+        super(Border, self).__init__()
+        self.is_border=True
+
+

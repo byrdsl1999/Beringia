@@ -11,6 +11,7 @@ import numpy as np
 import networkx as nx
 
 from beringia.localebase import Locale
+from beringia.localebase import Border
 from beringia.constants import STATE_CONSTANTS
 
 
@@ -24,21 +25,24 @@ class Region(object):
         colorize (bool):
 
     """
-    def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True):
+    def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True, edges=True):
         self.xdim = xdim
         self.ydim = ydim
         self.grid_type = grid_type
         if grid_type == '2d':
-            self.space = nx.grid_2d_graph(xdim, ydim)
+            self.space = nx.grid_2d_graph(self.xdim, ydim)
         elif grid_type == 'hex':
-            self.space = nx.hexagonal_lattice_graph(xdim, ydim)
+            self.space = nx.hexagonal_lattice_graph(self.xdim, ydim)
         elif grid_type == 'tri':
-            self.space = nx.triangular_lattice_graph(xdim, ydim)
+            self.space = nx.triangular_lattice_graph(self.xdim, ydim)
         else:
             # TODO: raise exception? default to 2d?
-            self.space = nx.grid_2d_graph(xdim, ydim)
+            self.space = nx.grid_2d_graph(self.xdim, ydim)
         for node in self.space.nodes:
             self.space.node[node]['locale'] = Locale()
+        self.nodes = set([node for node in self.space.nodes])
+        if edges:
+            self._add_border_nodes()
         self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
         self.time = 0
         self.colorize = colorize
@@ -65,6 +69,34 @@ class Region(object):
                     out += str(self.view_locale())
                 out += '\n'
             return out
+
+    def _add_border_nodes(self):
+        '''
+        Presently border nodes are going to copy the properties of their neighboring nodes.
+        :return:
+        '''
+        self.border_nodes = set()
+        for i in range(self.xdim):
+            self.space.add_node((i, -1))
+            self.space.add_edge((i, -1), (i, 0))
+            self.border_nodes.add((i, -1))
+            self.space.add_node((i, self.ydim))
+            self.space.add_edge((i, self.ydim), (i, self.ydim - 1))
+            self.border_nodes.add((i, self.ydim))
+        for j in range(self.ydim):
+            self.space.add_node((-1, j))
+            self.space.add_edge((-1, j), (0, j))
+            self.border_nodes.add((-1, j))
+            self.space.add_node((self.xdim, j))
+            self.space.add_edge((self.xdim, j), (self.xdim - 1, j))
+            self.border_nodes.add((self.xdim, j))
+        for node in self.border_nodes:
+            self.space.node[node]['locale'] = Border()
+            neighbor=[i for i in nx.neighbors(self.space, node)][0]
+            self.space.node[node]['locale'].geology.elevation_base = self.space.node[neighbor]['locale'].geology.elevation_base
+            self.space.node[node]['locale'].geology.soil_depth = self.space.node[neighbor]['locale'].geology.soil_depth
+            self.space.node[node]['locale'].geology.elevation = self.space.node[neighbor]['locale'].geology.elevation
+
 
     def show_map(self, do_print=True):
         """show_map docs
@@ -113,7 +145,11 @@ class Region(object):
         else:
             print('!!! This grid type does not have this feature implemented !!!')
 
-    def __hash__(self, do_print=True):
+
+
+
+
+    def show_elevation_map(self, do_print=True):
         """show_elevation_map docs
 
         Args:
@@ -145,7 +181,7 @@ class Region(object):
         """
         for _ in range(count):
             self.time += 1
-            for node in self.space.nodes:
+            for node in self.nodes:
                 self.space.node[node]['locale'].pass_time()
             self.spread_fire()
             self.erode_all(magnitude=0.1)
@@ -168,7 +204,7 @@ class Region(object):
         """
         locales_on_fire = []
         fires_present = False
-        for node in self.space.nodes:
+        for node in self.nodes:
             if self.space.node[node]['locale'].on_fire == 1:
                 locales_on_fire.append(node)
         if locales_on_fire:
@@ -186,7 +222,7 @@ class Region(object):
             self.show_map()
             time.sleep(0.5)
 
-    def view_locale(self, x, y, fire_state=False):
+    def view_locale(self, x=0, y=0, fire_state=False):
         """view_locale docs
 
         Args:
@@ -203,7 +239,7 @@ class Region(object):
         else:
             return self.space.node[(x, y)]['locale']
 
-    def view_elevation(self, x, y):
+    def view_elevation(self, x=0, y=0):
         """view_elevation docs
 
         Args:
@@ -228,17 +264,17 @@ class Region(object):
         neighboring_nodes = self.space.neighbors(node)
         lowest_neighbor = node
         for eachNode in neighboring_nodes:
-            if self.space.node[lowest_neighbor]['locale'].geology.elevation > \
-                    self.space.node[eachNode]['locale'].geology.elevation:
+            if self.space.node[lowest_neighbor]['locale'].geology.elevation > self.space.node[eachNode]['locale'].geology.elevation:
                 lowest_neighbor = eachNode
 
         if lowest_neighbor != node:
-            slope = (self.space.node[node]['locale'].geology.elevation -
-                     self.space.node[lowest_neighbor]['locale'].geology.elevation)
+            slope = (self.space.node[node]['locale'].geology.elevation
+                     - self.space.node[lowest_neighbor]['locale'].geology.elevation)
         else:
             slope = 0.01
         transport = self.space.node[node]['locale'].geology.erode(magnitude, rate, slope)
         self.space.node[lowest_neighbor]['locale'].geology.accrete(transport)
+
 
     def erode_all(self, magnitude=1.0, rate=0.01):
         """erode_all docs
@@ -248,7 +284,7 @@ class Region(object):
             rate (float):
 
         """
-        for node in self.space.nodes:
+        for node in self.nodes:
             self.erode_one(node, magnitude, rate)
 
     def randomize_elevation_base(self, mean=5, sd=1.5):
@@ -259,7 +295,7 @@ class Region(object):
             sd (float):
 
         """
-        for node in self.space.nodes():
+        for node in self.nodes:
             self.space.node[node]['locale'].geology.elevation_base = np.random.normal(mean, sd)
             self.space.node[node]['locale'].geology.recalculate_values()
 
@@ -274,5 +310,12 @@ class Region(object):
         adj_mat = nx.adjacency_matrix(self.space).todense()
         means = [mean for _ in range(self.xdim * self.ydim)]
         elevations = np.random.multivariate_normal(means, (adj_mat*cov))
-        for node in enumerate(self.space.nodes):
+        for node in enumerate(self.nodes):
             self.space.node[node[1]]['locale'].geology.elevation_base = elevations[node[0]]
+
+    def find_basins(self):
+        """Find all the basins in the region and update the locales with the elevation of the point of outflow for the
+        basin.
+        TODO: Maybe we should track all the basins, and then populate them with fish!
+        """
+        pass
