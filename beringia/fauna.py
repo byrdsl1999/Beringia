@@ -43,9 +43,9 @@ class Fauna(Feature):
         arg (str):
 
     """
-    def __init__(self, arg):
+    def __init__(self):
         super(Fauna, self).__init__()
-        self.arg = arg
+
 
 
 class AnimalBulk(Fauna):
@@ -59,20 +59,78 @@ class AnimalBulk(Fauna):
 
     """
     def __init__(self, population=0.0, reproduction_rate=0.01, starvation_rate=0.02, feeding_rate=0.5):
-        super(AnimalBulk, self).__init__()
+        super().__init__()
         self.population = population
         # This is essentially the energy conversion rate. (eg 10 lb grass makes 1 lb beef)
         self.reproduction_rate = reproduction_rate
         self.starvation_rate = starvation_rate
         self.feeding_rate = feeding_rate
         self.ambient_death_rate = 0.05
+        self.stress=0.0
+        self.stress_response ={
+            'migrate': 0.375,
+            'starve': 0.75,
+            'reproduce': 0.20
+        }
 
-    def zero_correct_pop(self):
-        """zero_correct_pop docs
+    def _zero_correct_pop(self):
+        """_zero_correct_pop docs
 
         """
         if self.population <= 0:
             self.population = 0.0
+
+    def pass_turn(self, target=None, sm=1.0, stress_rate=0.05):
+        """pass_turn docs
+
+        """
+        starvation_threshold = 0.2 #I guess? tune this.
+        food_need_satisfied = self.newfeed(target)
+        if (1.0-food_need_satisfied) < starvation_threshold:
+            self.stress += stress_rate * (food_need_satisfied-starvation_threshold)
+        else:
+            self.stress -= stress_rate
+
+        if self.stress > self.stress_response['migrate']*sm:
+            self.migrate()
+        if self.stress > self.stress_response['starve']*sm:
+            self.starve()
+        if self.stress < self.stress_response['reproduce']*sm:
+            self.reproduce()
+
+    def newfeed(self, target=None):
+        """feed docs
+
+        Todo:
+            * Be able to feed on multiple prey, and select prey. Either at random, in order of prevalence, or order of
+                ease of finding.
+            * Eat plants.
+            * Eat specific animals.
+            * Cause the stuff that is being fed on are different classes, this should probably be a feeding that is
+                class specific.
+
+        Args:
+            target (beringia.feature.Feature):
+
+        Returns:
+            float: The thing that this returns.
+
+        """
+        consumption_need = self.population * self.feeding_rate
+        consumption = 0.0
+        available_food = target.population # * target.availability
+        if issubclass(type(target), AnimalBulk):
+            consumption = min([available_food, consumption_need])
+            target.population -= consumption
+            target._zero_correct_pop()
+        elif issubclass(type(target), PlantBulk):
+            pass
+        else:
+            food = 1.0
+
+        return min([consumption/consumption_need, 1.0])
+
+
 
     def feed(self, target=None):
         """feed docs
@@ -97,30 +155,30 @@ class AnimalBulk(Fauna):
         food = target.population
         if issubclass(type(target), AnimalBulk):
             target.population -= consumption
-            target.zero_correct_pop()
+            target._zero_correct_pop()
         elif issubclass(type(target), PlantBulk):
             pass
         else:
             food = 1.0
 
         if consumption < food:
-            self._breed()
+            self.reproduce()
             return consumption
         elif consumption >= food:
-            self._starve()
+            self.starve()
             return food
 
-    def _breed(self):
+    def reproduce(self, multiplier=1.0):
         # TODO look up population growth rate functions.
-        self.population += self.population * self.reproduction_rate
+        self.population += self.population * self.reproduction_rate * multiplier
 
-    def _starve(self):
+    def starve(self):
         self.population -= self.population * self.starvation_rate + self.starvation_rate
-        self.zero_correct_pop()
+        self._zero_correct_pop()
 
     def _ambient_death(self):
         self.population = self.population * (1 - self.ambient_death_rate)
-        self.zero_correct_pop()
+        self._zero_correct_pop()
 
     def depredation(self, predation_rate):
         """depredation docs
@@ -186,7 +244,7 @@ class Invertebrates(AnimalBulk):
         """
         self.fallout()
         self.feed(food)
-        self.zero_correct_pop()
+        self._zero_correct_pop()
         self._ambient_death()
 
 
@@ -222,6 +280,9 @@ class InvertPredators(Invertebrates):
     """
     def __init__(self, feeding_rate=0.15, fallout_rate=0.0001):
         super(InvertPredators, self).__init__(feeding_rate=feeding_rate, fallout_rate=fallout_rate)
+
+
+
 
 
 class Vertebrates(AnimalBulk):

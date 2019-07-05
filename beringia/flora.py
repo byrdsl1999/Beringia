@@ -232,8 +232,8 @@ class FloraSystem1(Flora):
 
 class FloraSystem2(Flora):
     """
-    This is the base flora class, which includes all the functions necessary. This particular version does not work
-    well. Instead, use one of the other flora systems.
+    This flora system increases the population of plants in a roughly linear fashion from [0, 10). Fire probabilities
+    scale similarly.
 
     Flora is housed within a locale, and keeps track of which species are present and in what quantities.
 
@@ -243,7 +243,7 @@ class FloraSystem2(Flora):
         super(Flora, self).__init__()
         self.state = 0.0  #State exists from 0-9 continuous, but should be rounded for display.
         self.on_fire = 0
-        self.random_growth = False
+        self.random_growth = True
 
     def increment_state(self, rate = 0.05, max= 9.9999):
         """increment_state docs
@@ -253,18 +253,22 @@ class FloraSystem2(Flora):
 
         """
         if not self.random_growth:
-            if self.state <= max:
+            if self.state < max:
                 self.state += rate
+                if self.state > max:
+                    self.state = max
             else:
                 self.state = max
         elif self.random_growth:
             if self.state <= max:
                 self.state += np.random.normal(rate, rate/5)
+                if self.state > max:
+                    self.state = max
             else:
                 self.state = max
 
 
-    def risk_fire(self, fire_risk=0.001):
+    def risk_fire(self, fire_risk=0.0005):
         """risk_fire docs
 
         Returns:
@@ -277,7 +281,7 @@ class FloraSystem2(Flora):
             return True
         return False
 
-    def catch_fire(self, fire_spread_prob= 0.07):
+    def catch_fire(self, fire_spread_prob= 0.08):
         """catch_fire docs
 
         Returns:
@@ -295,6 +299,64 @@ class FloraSystem2(Flora):
 
         """
         self.state =0.0
+        self.on_fire = 0
+
+class FloraSystem3(Flora):
+    """
+    This flora system increases plant mass as a logistic function from (0, 10). Fire probabilities
+    scale linearly.
+
+    Flora is housed within a locale, and keeps track of which species are present and in what quantities.
+
+    """
+
+    def __init__(self):
+        super(Flora, self).__init__()
+        self.state = 0.1  #State exists from (0-10) continuous, but should be rounded for display.
+        self.on_fire = 0
+        self.random_growth = False
+
+    def increment_state(self, rate = 0.05, max= 9.9999):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
+        self.state += rate * self.state * (1 - self.state/max)
+
+
+    def risk_fire(self, fire_risk=0.0005):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < fire_risk * self.state:
+            self.on_fire = 1
+            return True
+        return False
+
+    def catch_fire(self, fire_spread_prob= 0.08):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.state * fire_spread_prob:
+            self.on_fire = 1
+            return True
+        return False
+
+    def burn(self):
+        """burn docs
+
+        """
+        self.state = self.state * 0.1
         self.on_fire = 0
 
 class PlantBulk(Flora):
@@ -361,6 +423,7 @@ class PlantBulk(Flora):
         else:
             return True
 
+# TODO: The following is where I would like to end up, but is iceboxed for now.
 
 class Mosses(PlantBulk):
     """Mosses class docs

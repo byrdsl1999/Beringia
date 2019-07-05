@@ -25,7 +25,7 @@ class Region(object):
         colorize (bool):
 
     """
-    def __init__(self, xdim=10, ydim=10, grid_type='2d', colorize=True, edges=True):
+    def __init__(self, xdim=10, ydim=10, grid_type='2d', flora_system=1, colorize=True, edges=True):
         self.xdim = xdim
         self.ydim = ydim
         self.grid_type = grid_type
@@ -39,7 +39,7 @@ class Region(object):
             # TODO: raise exception? default to 2d?
             self.space = nx.grid_2d_graph(self.xdim, ydim)
         for node in self.space.nodes:
-            self.space.node[node]['locale'] = Locale()
+            self.space.node[node]['locale'] = Locale(flora_system=flora_system)
         self.nodes = set([node for node in self.space.nodes])
         if edges:
             self._add_border_nodes()
@@ -99,6 +99,8 @@ class Region(object):
 
 
     def show_map(self, do_print=True):
+        # TODO: presently fires are not being updated on the map as they spread. I'm guessing that there's a problem in
+        #  the __str__ /__repr__ function in either localbase or flora.
         """show_map docs
 
         Args:
@@ -145,10 +147,6 @@ class Region(object):
         else:
             print('!!! This grid type does not have this feature implemented !!!')
 
-
-
-
-
     def show_elevation_map(self, do_print=True):
         """show_elevation_map docs
 
@@ -192,7 +190,7 @@ class Region(object):
             self.show_map()
             time.sleep(pause)
 
-    def spread_fire(self, slow_burn=False):
+    def spread_fire(self, slow_burn=True):
         """Scan locales for fire, and if present, cause fire to spread to neighboring regions.
 
         Todo:
@@ -212,7 +210,7 @@ class Region(object):
         for locale_ in locales_on_fire:
             neighboring_nodes = self.space.neighbors(locale_)
             for node in neighboring_nodes:
-                if self.space.node[node]['locale'].on_fire == 0:
+                if self.space.node[node]['locale'].flora.on_fire == 0:
                     if self.space.node[node]['locale'].catch_fire():
                         locales_on_fire.append(node)
                         if slow_burn:
@@ -220,7 +218,7 @@ class Region(object):
                             time.sleep(0.15)
         if fires_present:
             self.show_map()
-            time.sleep(0.5)
+            time.sleep(0.15)
 
     def view_locale(self, x=0, y=0, fire_state=False):
         """view_locale docs

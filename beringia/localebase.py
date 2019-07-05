@@ -9,11 +9,11 @@ import numpy as np
 
 from beringia.soil import Geology, BorderGeology
 from beringia.constants import STATE_CONSTANTS, FEATURES_SWITCH, PLANT_COLOR_KEY
-from beringia.flora import FloraSystem0, FloraSystem1, FloraSystem2
+from beringia.flora import FloraSystem0, FloraSystem1, FloraSystem2, FloraSystem3
 
 
 
-class Locale(object):
+class Locale_Deprecated(object):
     """A locale is conceptually a small region which contains a number of biotic and abiotic features which simulate
     a local ecosystem. It has been conceived of initially as a patch of land about 1 acre in size.
 
@@ -95,7 +95,7 @@ class Locale(object):
         self.on_fire = 0
 
 
-class NewLocale(object):
+class Locale(object):
     """
     IN PROGRESS. Same as old locale in function. implements flora object.
     A locale is conceptually a small region which contains a number of biotic and abiotic features which simulate
@@ -108,8 +108,6 @@ class NewLocale(object):
             self.geology = Geology()
         self.state = self.flora.state
         self.on_fire = self.flora.on_fire
-
-
 
     def __str__(self):
         if self.on_fire == 0:
@@ -124,15 +122,14 @@ class NewLocale(object):
         switch={
             0:FloraSystem0(),
             1:FloraSystem1(),
-            2:FloraSystem2()
+            2:FloraSystem2(),
+            3:FloraSystem3()
         }
         return switch.get(system, FloraSystem1())
 
     def _update_values(self):
         self.state=int(self.flora.state)
         self.on_fire = self.flora.on_fire
-
-
 
     def pass_time(self, ticks=1):
         """pass_time doc
@@ -145,6 +142,29 @@ class NewLocale(object):
             self.flora.risk_fire()
             self._update_values()
 
+    def risk_fire(self):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
+        self.flora.risk_fire()
+
+    def catch_fire(self):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
+        return self.flora.catch_fire()
+
+    def burn(self):
+        """burn docs
+
+        """
+        self.flora.burn()
 
 class Border(Locale):
     def __init__(self):
