@@ -1,31 +1,39 @@
 # -*- coding: utf-8 -*-
 """region.py
 
+The region object should be tasked with all inter locale interactions. These might include fire spreading, and locales
+eroding from ones locale to another. Locales should be able to handle all their actions on their own, but return any
+relevant info that the interation requires.
+
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
 """
 import time
+import simpy as sp
 
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
 
 from beringia.localebase import Locale
 from beringia.localebase import Border
-from beringia.constants import STATE_CONSTANTS
+from beringia.constants import STATE_CONSTANTS, PLANT_COLOR_KEY, GRAYSCALE_COLOR_KEY
+from math import floor
+
 
 
 class Region(object):
     """Region class docs
 
-    Args:
+    A
         xdim (int):
         ydim (int):
         grid_type (str):
         colorize (bool):
 
     """
-    def __init__(self, xdim=10, ydim=10, grid_type='2d', flora_system=1, colorize=True, edges=True):
+    def __init__(self, xdim=10, ydim=10, grid_type='2d', flora_system=1, colorize=True, edges=True, slow_burn=False):
         self.xdim = xdim
         self.ydim = ydim
         self.grid_type = grid_type
@@ -46,7 +54,12 @@ class Region(object):
         self.conversion_rates = {0: 0.2, 1: 0.1, 2: 0.15, 3: 0.05, 4: 0.1, 5: 0}
         self.time = 0
         self.colorize = colorize
+        self.slow_burn = slow_burn
         self.constants = STATE_CONSTANTS
+
+    #def _scheduler(self):
+    #    self.time_env = sp.Environment()
+
 
     def __repr__(self, verbose=False):
         if not verbose or self.grid_type != '2d':
@@ -71,10 +84,10 @@ class Region(object):
             return out
 
     def _add_border_nodes(self):
-        '''
+        """"
         Presently border nodes are going to copy the properties of their neighboring nodes.
         :return:
-        '''
+        """
         self.border_nodes = set()
         for i in range(self.xdim):
             self.space.add_node((i, -1))
@@ -98,28 +111,43 @@ class Region(object):
             self.space.node[node]['locale'].geology.elevation = self.space.node[neighbor]['locale'].geology.elevation
 
 
-    def show_map(self, do_print=True):
-        # TODO: presently fires are not being updated on the map as they spread. I'm guessing that there's a problem in
-        #  the __str__ /__repr__ function in either localbase or flora.
+    def show_map(self, do_print=True, show_fire=True, colorize=True):
         """show_map docs
 
         Args:
             do_print (bool):
+            show_fire (bool):
+            colorize (bool):
 
         Returns:
             str:
 
         """
         if self.grid_type == '2d':
-            out = ''
-            for y in range(self.ydim):
-                for x in range(self.xdim):
-                    out += str(self.view_locale(x, y))
-                out += '\n'
-            out += '\r'
             if do_print:
+                out = ''
+                for y in range(self.ydim):
+                    for x in range(self.xdim):
+                        if self.get_locale(x,y).on_fire == 1 and show_fire:
+                            if colorize:
+                                out += "\033[1;31mf\033[0;37m"
+                            else:
+                                out += "f"
+                        else:
+                            out += str(self.view_locale(x, y, colorize=colorize))
+                    out += '\n'
+                out += '\r'
                 print(out)
-            else:
+            elif not do_print:
+                out = ''
+                for y in range(self.ydim):
+                    for x in range(self.xdim):
+                        if self.get_locale(x,y).on_fire == 1 and show_fire:
+                            out += "f"
+                        else:
+                            out += str(self.view_locale(x, y, colorize=colorize))
+                    out += '\n'
+                out += '\r'
                 return out
         else:
             print('!!! This grid type does not have this feature implemented !!!')
@@ -136,8 +164,8 @@ class Region(object):
         """
         if self.grid_type == '2d':
             out = ''
-            for x in range(self.xdim):
-                for y in range(self.ydim):
+            for y in range(self.ydim):
+                for x in range(self.xdim):
                     out += str(self.view_locale(x, y, fire_state=True))
                 out += '\n'
             if do_print:
@@ -159,9 +187,9 @@ class Region(object):
         """
         if self.grid_type == '2d':
             out = ''
-            for x in range(self.xdim):
-                for y in range(self.ydim):
-                    out += str(self.view_elevation(x, y))
+            for y in range(self.ydim):
+                for x in range(self.xdim):
+                    out += str(self.view_elevation(x, y, colorize= True))
                 out += '\n'
             if do_print:
                 print(out)
@@ -170,27 +198,73 @@ class Region(object):
         else:
             print('!!! This grid type does not have this feature implemented !!!')
 
-    def pass_time(self, count=1):
+    def get_map_array(self, kind= "flora"):
+        if self.grid_type != '2d':
+            print("Grid type:", self.grid_type, " not supported.")
+            return None
+        elif self.grid_type == '2d':
+            grid = np.zeros((self.xdim, self.ydim))
+            for i in range(self.xdim):
+                for j in range(self.ydim):
+                    if kind=="flora":
+                        grid[i,j]=self.get_locale(i,j).state
+                    elif kind=="elev" or kind=="elevation":
+                        grid[i, j] = self.get_locale(i, j).geology.elevation
+                    else:
+                        grid[i,j]=self.get_locale(i,j).state
+                        print("Map type error. Returning default.")  #How should I be handling this?
+            return grid
+
+    def show_heat_map(self, kind="flora"):
+        array = self.get_map_array(kind)
+        plt.imshow(array, cmap="YlGn")
+        plt.colorbar()
+        plt.show()
+
+
+
+
+    def pass_time(self, count=1, show_heat_map=False):
         """Move forward one time(or count # of) step(s).
 
         Args:
             count (int):
 
         """
-        for _ in range(count):
-            self.time += 1
-            for node in self.nodes:
-                self.space.node[node]['locale'].pass_time()
-            self.spread_fire()
-            self.erode_all(magnitude=0.1)
+        if not show_heat_map or count > 50:
+            if show_heat_map: print("Count too high. Display hidden")
+            for _ in range(count):
+                self.time += 1
+                for node in self.nodes:
+                    self.space.node[node]['locale'].pass_time()
+                self.spread_fire(show=False)
+                self.erode_all(magnitude=0.1)
+        if show_heat_map:
+            array = self.get_map_array("flora")
+            plt.imshow(array, cmap="YlGn")
+            plt.colorbar()
+            for _ in range(count):
+                self.time += 1
+                for node in self.nodes:
+                    self.space.node[node]['locale'].pass_time()
+                self.spread_fire(show=False)
+                self.erode_all(magnitude=0.1)
 
-    def show_turns(self, count=1, pause=0.5):
+                array = self.get_map_array("flora")
+                plt.imshow(array, cmap="YlGn")
+                plt.draw()
+                plt.pause(0.1)
+
+
+
+    def show_turns(self, count=1, pause=0.25):
         for _ in range(count):
             self.pass_time()
             self.show_map()
             time.sleep(pause)
 
-    def spread_fire(self, slow_burn=True):
+
+    def spread_fire(self, verbose=False, pause=0.15, show=True):
         """Scan locales for fire, and if present, cause fire to spread to neighboring regions.
 
         Todo:
@@ -201,32 +275,40 @@ class Region(object):
 
         """
         locales_on_fire = []
-        fires_present = False
+        fires_present: bool = False
         for node in self.nodes:
             if self.space.node[node]['locale'].on_fire == 1:
                 locales_on_fire.append(node)
+        if verbose: print("Locales initially on fire:", locales_on_fire)
         if locales_on_fire:
             fires_present = True
+            if verbose: print("Fire is present.")
         for locale_ in locales_on_fire:
             neighboring_nodes = self.space.neighbors(locale_)
+            if verbose: print("Fire is burning at:", node)
+
             for node in neighboring_nodes:
                 if self.space.node[node]['locale'].flora.on_fire == 0:
                     if self.space.node[node]['locale'].catch_fire():
                         locales_on_fire.append(node)
-                        if slow_burn:
-                            self.show_map()
-                            time.sleep(0.15)
-        if fires_present:
-            self.show_map()
-            time.sleep(0.15)
 
-    def view_locale(self, x=0, y=0, fire_state=False):
+                        if verbose: print("Fire has spread to:", node)
+
+                        if self.slow_burn and show:
+                            self.show_map()
+                            time.sleep(pause)
+        if fires_present and not self.slow_burn and show:
+            self.show_map()
+            time.sleep(pause*2)
+
+    def view_locale(self, x=0, y=0, fire_state=False, colorize=True):
         """view_locale docs
 
         Args:
             x (int):
             y (int):
             fire_state (bool):
+            colorize (bool):
 
         Returns:
             beringia.locale.Locale:
@@ -235,20 +317,27 @@ class Region(object):
         if fire_state:
             return self.space.node[(x, y)]['locale'].on_fire
         else:
-            return self.space.node[(x, y)]['locale']
+            if colorize:
+                return PLANT_COLOR_KEY[int(floor(self.space.node[(x, y)]['locale'].state))]
+            else:
+                return int(floor(self.space.node[(x, y)]['locale'].state))
 
-    def view_elevation(self, x=0, y=0):
+    def view_elevation(self, x=0, y=0, colorize=False):
         """view_elevation docs
 
         Args:
             x (int):
             y (int):
+            colorize(bool)
 
         Returns:
             int:
 
         """
-        return int(self.space.node[(x, y)]['locale'].geology.elevation//1)
+        if colorize:
+            return GRAYSCALE_COLOR_KEY[int(self.space.node[(x, y)]['locale'].geology.elevation//1)]
+        else:
+            return self.space.node[(x, y)]['locale'].geology.elevation
 
     def erode_one(self, node, magnitude=1.0, rate=0.01):
         """This will cause erosion to occur at one location.
@@ -274,6 +363,7 @@ class Region(object):
         self.space.node[lowest_neighbor]['locale'].geology.accrete(transport)
 
 
+
     def erode_all(self, magnitude=1.0, rate=0.01):
         """erode_all docs
 
@@ -284,6 +374,35 @@ class Region(object):
         """
         for node in self.nodes:
             self.erode_one(node, magnitude, rate)
+
+    def calculate_aspect(self):
+        if self.grid_type == '2d':
+            for y in range(self.ydim):
+                for x in range(self.xdim):
+
+                    if y == 0:
+                        north = self.view_elevation(x,y, colorize=False)
+                    else:
+                        north = self.view_elevation(x, y-1, colorize=False)
+
+                    if y == self.ydim:
+                        south = self.view_elevation(x, y, colorize=False)
+                    else:
+                        south = self.view_elevation(x, y+1, colorize=False)
+
+                    if x == 0:
+                        east = self.view_elevation(x,y, colorize=False)
+                    else:
+                        east = self.view_elevation(x-1, y, colorize=False)
+
+                    if x == self.xdim:
+                        west = self.view_elevation(x,y, colorize=False)
+                    else:
+                        west = self.view_elevation(x+1, y, colorize=False)
+
+                    print(north, south, east, west)
+                    self.space.node[(x, y)]['locale'].geology._calculate_aspect(north, south, east, west)
+
 
     def randomize_elevation_base(self, mean=5, sd=1.5):
         """randomize_elevation_base docs
@@ -317,3 +436,10 @@ class Region(object):
         TODO: Maybe we should track all the basins, and then populate them with fish!
         """
         pass
+
+    def get_locale(self,x,y):
+        if x> self.xdim or y>self.ydim or x <0 or y <0:
+            print("Value out of range.")
+            return None
+        else:
+            return self.space.node[(x,y)]['locale']

@@ -6,6 +6,7 @@
 
 Todo:
     * rocks
+        surface rocks(decrease growing surface area, but increase precipitation penetration
     * Soil Quality
         Sand/Loam/Clay
         organic matter
@@ -35,7 +36,7 @@ class Geology(object):
 
     """
     def __init__(
-            self, elevation_base=np.random.gamma(5, 0.5), soil_depth=np.random.lognormal(0.25, 0), soil_moisture=0.5
+        self, elevation_base=np.random.gamma(5, 0.5), soil_depth=np.random.lognormal(0.25, 0), soil_moisture=0.5
     ):
         self.elevation_base = elevation_base
         self.soil_depth = soil_depth
@@ -45,6 +46,7 @@ class Geology(object):
         self.soil_moisture=self.hydrology.water_content/self.hydrology.water_capacity
         self.soil_stability=0.0
         self.basin_elevation = self.elevation
+        self.aspect = self._calculate_aspect()
 
     def recalculate_values(self):
         """recalculate_values docs
@@ -59,6 +61,26 @@ class Geology(object):
     def set_basin_elevation(self, elevation = None):
         if not elevation: elevation = self.elevation
         self.basin_elevation = elevation
+
+    def _calculate_aspect(self, north_elev=None, south_elev=None, east_elev=None, west_elev=None):
+        """Calculate the slope aspect(direction).
+
+        Returns a tuple of north-south and east-west aspect. Positive values represent downward slopes to the north and
+        east respectively. Negative values represent slopes to the south and west.
+
+        Units are currently ambiguous. Perhaps % grade.
+
+        """
+        if not north_elev:
+            north_elev = float(self.elevation)
+        if not south_elev:
+            south_elev = float(self.elevation)
+        if not east_elev:
+            east_elev = float(self.elevation)
+        if not west_elev:
+            west_elev = float(self.elevation)
+        self.aspect = (south_elev - north_elev, west_elev - east_elev)
+        return (south_elev - north_elev, west_elev - east_elev)
 
     def erode(self, magnitude=1.0, rate=0.01, slope=0.1, soil_stability=None):
         """erode docs

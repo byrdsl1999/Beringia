@@ -13,10 +13,14 @@
             X System 2:
                 A system with one continunous flora variable.
                 the variable increases with time.
-            System 3(see https://en.wikipedia.org/wiki/Ecological_succession#/media/File:Forest_succession_depicted_over_time.png):
+            X System 3:
+                As above with logistic growth function.
+            System 4: (in progress)
+            As above but with geology interactions
+            System 5(see https://en.wikipedia.org/wiki/Ecological_succession#/media/File:Forest_succession_depicted_over_time.png):
                 A system with several guilds of plants, with shifting dominance.
                 Mechanism is probably going to be some form of inhibtion/facilitation.
-            System 4:
+            System 6:
                 Similar to above with individual plant species as members of guilds.
         Introduce:
             Plant water requirements
@@ -47,6 +51,13 @@ class Flora(Feature):
         super(Feature, self).__init__()
         self.state = 0
         self.on_fire = 0
+
+    def __repr__(self, verbose=False):
+        if not verbose:
+            return("FloraState: "+str(self.state))
+        else:
+            return("FloraState: "+str(self.state)+"\nFireState: "+str(self.on_fire)) #TODO change something more specific
+
 
     def increment_state(self):
         """increment_state docs
@@ -90,6 +101,21 @@ class Flora(Feature):
         self.state -= 1
         self.on_fire = 0
 
+    def get_depredated(self, magnitude=0, percentage=None, on=False):
+        """get_depredated docs
+        Population experiences herbivory.
+
+        TODO: Rework. PS: Actually this may be fine for the base class.
+        """
+        if on:
+            if not percentage:
+                self.state -= magnitude
+            if percentage:
+                self.state = self.state * (1.0-percentage)
+            return bool(self.state)
+        else:
+            return bool(self.state)
+
 class FloraSystem0(Flora):
     """The most basic plant system that tracks simply Plants/No Plants state at each location.
     """
@@ -99,8 +125,8 @@ class FloraSystem0(Flora):
         self.state = 0
         self.on_fire = 0
         self.STATE_CONSTANTS = {
-            0: {'stateIncreaseProb': 0.20, 'stateDecreaseProb': 0, 'fireStartProb': 0.000, 'fireSpreadProb': 0.000},
-            1: {'stateIncreaseProb': 0.00, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0005, 'fireSpreadProb': 0.500},
+            0: {'stateIncreaseProb': 0.20, 'stateDecreaseProb': 0.0, 'fireStartProb': 0.000, 'fireSpreadProb': 0.000},
+            1: {'stateIncreaseProb': 0.00, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.0015, 'fireSpreadProb': 0.500},
             -1: {'stateIncreaseProb': 1.00, 'stateDecreaseProb': 0.00, 'fireStartProb': 0.000,
                  'fireSpreadProb': 0.000}
         }
@@ -157,6 +183,7 @@ class FloraSystem0(Flora):
         """
         self.state = -1
         self.on_fire = 0
+
 
 
 class FloraSystem1(Flora):
@@ -244,6 +271,7 @@ class FloraSystem2(Flora):
         self.state = 0.0  #State exists from 0-9 continuous, but should be rounded for display.
         self.on_fire = 0
         self.random_growth = True
+        self.herbivory_active = False
 
     def increment_state(self, rate = 0.05, max= 9.9999):
         """increment_state docs
@@ -267,8 +295,17 @@ class FloraSystem2(Flora):
             else:
                 self.state = max
 
+    def _zero_correct_state(self):
+        """_zero_correct_pop docs
+        Private method that sets negative state values to zero. Returns False if population is <=0.
 
-    def risk_fire(self, fire_risk=0.0005):
+        """
+        if self.state <= 0.0:
+            self.state = 0.0
+            return False
+        return True
+
+    def risk_fire(self, fire_risk=0.0002):
         """risk_fire docs
 
         Returns:
@@ -281,7 +318,7 @@ class FloraSystem2(Flora):
             return True
         return False
 
-    def catch_fire(self, fire_spread_prob= 0.08):
+    def catch_fire(self, fire_spread_prob= 0.05):
         """catch_fire docs
 
         Returns:
@@ -294,12 +331,27 @@ class FloraSystem2(Flora):
             return True
         return False
 
-    def burn(self):
+    def burn(self, fire_damage= 0.9):
         """burn docs
 
         """
-        self.state =0.0
+        self.state = self.state * (1-fire_damage)
         self.on_fire = 0
+
+    def get_depredated(self, magnitude=0.0, percentage=None, on=False):
+        """get_depredated docs
+        Population experiences herbivory.
+
+        TODO: Rework. PS: Actually this may be fine for the base class.
+        """
+        if on or self.herbivory_active:
+            if not percentage:
+                self.state -= magnitude
+            if percentage:
+                self.state = self.state * (1.0-percentage)
+            return self._zero_correct_state()
+        else:
+            return bool(floor(self.state))
 
 class FloraSystem3(Flora):
     """
@@ -352,12 +404,70 @@ class FloraSystem3(Flora):
             return True
         return False
 
-    def burn(self):
+    def burn(self, fire_damage= 0.9):
         """burn docs
 
         """
-        self.state = self.state * 0.1
+        self.state = self.state * (1-fire_damage)
         self.on_fire = 0
+
+
+class FloraSystem4(Flora):
+    """
+    Flora System 4 is system 3 with geology elements introduced
+    In progress....
+    """
+
+    def __init__(self):
+        super(Flora, self).__init__()
+        self.state = 0.1  #State exists from (0-10) continuous, but should be rounded for display.
+        self.on_fire = 0
+        self.random_growth = False
+
+
+    def increment_state(self, rate = 0.05, max= 9.9999):
+        """increment_state docs
+
+        Returns:
+            bool:
+
+        """
+        self.state += rate * self.state * (1 - self.state/max)
+
+
+    def risk_fire(self, fire_risk=0.0005):
+        """risk_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < fire_risk * self.state:
+            self.on_fire = 1
+            return True
+        return False
+
+    def catch_fire(self, fire_spread_prob= 0.08):
+        """catch_fire docs
+
+        Returns:
+            bool:
+
+        """
+        roll = np.random.uniform(0, 1)
+        if roll < self.state * fire_spread_prob:
+            self.on_fire = 1
+            return True
+        return False
+
+    def burn(self, fire_damage= 0.9):
+        """burn docs
+
+        """
+        self.state = self.state * (1-fire_damage)
+        self.on_fire = 0
+
 
 class PlantBulk(Flora):
     """PlantBulk class docs

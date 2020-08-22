@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """fire.py
 
+This file is deprecated.
+
 .. _Docstring example here:
    https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
