@@ -28,3 +28,9 @@ make html
 ```
 
 
+## Usage
+
+Execute main.py. 
+
+"main.py" is currently missing a lot of the more interesting and fun features, but should give you a taste. 
+If you want to play around with the innards a bit more paste the contents of "region" into your python console.
