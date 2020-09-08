@@ -84,7 +84,8 @@ class Fauna(Feature):
 class FeedBag(Fauna):
     """FeedBag class docs
 
-    A dummy bulk animal pop with only pop as an attribute.
+    A dummy bulk animal pop with only pop as an attribute. It is used for debugging, so a test population has something
+    to feed off of.
 
     Args:
         population (float):
@@ -238,13 +239,10 @@ class BulkFauna(Fauna):
     def stress_response(self):
         self._stress_correct()
         if self.stress <= self.stress_responses['reproduce']:
-            print("reproducing")
             self.reproduce()
         if self.stress > self.stress_responses['starve']:
-            print("starving")
             self.starve()
         if self.stress > self.stress_responses['migrate']:
-            print("migrating")
             self.emigrate()
 
     def starve(self, magnitude=1.0):

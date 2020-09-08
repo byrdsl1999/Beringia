@@ -34,6 +34,7 @@
 
 """
 from scipy import stats
+from math import floor
 import numpy as np
 
 from beringia.feature import Feature

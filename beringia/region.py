@@ -10,7 +10,7 @@ relevant info that the interation requires.
 
 """
 import time
-import simpy as sp
+#import simpy as sp
 
 import numpy as np
 import networkx as nx
@@ -56,6 +56,7 @@ class Region(object):
         self.colorize = colorize
         self.slow_burn = slow_burn
         self.constants = STATE_CONSTANTS
+
 
     #def _scheduler(self):
     #    self.time_env = sp.Environment()
@@ -198,7 +199,30 @@ class Region(object):
         else:
             print('!!! This grid type does not have this feature implemented !!!')
 
-    def get_map_array(self, kind= "flora"):
+    def show_fauna_map(self, do_print=True, index=0):
+        """show_elevation_map docs
+
+        Args:
+            do_print (bool):
+
+        Returns:
+            str:
+
+        """
+        if self.grid_type == '2d':
+            out = ''
+            for y in range(self.ydim):
+                for x in range(self.xdim):
+                    out += str(self.view_fauna_pop(x, y, index, colorize=True))
+                out += '\n'
+            if do_print:
+                print(out)
+            else:
+                return out
+        else:
+            print('!!! This grid type does not have this feature implemented !!!')
+
+    def get_map_array(self, kind="flora", index=0):
         if self.grid_type != '2d':
             print("Grid type:", self.grid_type, " not supported.")
             return None
@@ -206,12 +230,14 @@ class Region(object):
             grid = np.zeros((self.xdim, self.ydim))
             for i in range(self.xdim):
                 for j in range(self.ydim):
-                    if kind=="flora":
-                        grid[i,j]=self.get_locale(i,j).state
-                    elif kind=="elev" or kind=="elevation":
+                    if kind == "flora":
+                        grid[i, j]=self.get_locale(i, j).state
+                    elif kind == "fauna":
+                        grid[i, j] = self.get_locale(i, j).fauna[index].population*100
+                    elif kind == "elev" or kind == "elevation":
                         grid[i, j] = self.get_locale(i, j).geology.elevation
                     else:
-                        grid[i,j]=self.get_locale(i,j).state
+                        grid[i, j]=self.get_locale(i, j).state
                         print("Map type error. Returning default.")  #How should I be handling this?
             return grid
 
@@ -220,9 +246,6 @@ class Region(object):
         plt.imshow(array, cmap="YlGn")
         plt.colorbar()
         plt.show()
-
-
-
 
     def pass_time(self, count=1, show_heat_map=False):
         """Move forward one time(or count # of) step(s).
@@ -255,14 +278,11 @@ class Region(object):
                 plt.draw()
                 plt.pause(0.1)
 
-
-
     def show_turns(self, count=1, pause=0.25):
         for _ in range(count):
             self.pass_time()
             self.show_map()
             time.sleep(pause)
-
 
     def spread_fire(self, verbose=False, pause=0.15, show=True):
         """Scan locales for fire, and if present, cause fire to spread to neighboring regions.
@@ -300,6 +320,39 @@ class Region(object):
         if fires_present and not self.slow_burn and show:
             self.show_map()
             time.sleep(pause*2)
+
+    def insert_new_fauna(self, new_fauna=None, target=None, all_locales=True, target_locale=None, simple_food_chain=True):
+        """insert_new_fauna docs
+
+        Args:
+            new_fauna (fauna):
+            target (feature, or other):
+            all_locales (bool):
+            target_locale (Locale):
+            simple_food_chain (bool)
+
+        Returns:
+            (bool): T/F success/failure
+
+        """
+        if all_locales:
+            for node in self.nodes:
+                if simple_food_chain:
+                    self.space.node[node]['locale'].insert_fauna(new_fauna)
+                    self.space.node[node]['locale'].fauna_set_simple_food_chain()
+                else:
+                    self.space.node[node]['locale'].insert_fauna(new_fauna, target)
+            return True
+        elif target_locale:
+            if simple_food_chain:
+                self.space.node[target_locale]['locale'].insert_fauna(new_fauna)
+                self.space.node[target_locale]['locale'].fauna_set_simple_food_chain()
+            else:
+                self.space.node[target_locale]['locale'].insert_fauna(new_fauna, target)
+            return True
+        else:
+            print("No target locale specified")
+            return False
 
     def view_locale(self, x=0, y=0, fire_state=False, colorize=True):
         """view_locale docs
@@ -339,6 +392,25 @@ class Region(object):
         else:
             return self.space.node[(x, y)]['locale'].geology.elevation
 
+    def view_fauna_pop(self, x=0, y=0, index=0, colorize=False, scale_factor=100):
+        """view_elevation docs
+
+        Args:
+            x (int): locale x dim.
+            y (int): locale y dim.
+            index (int): which fauna element to return. default is the first.
+            colorize(bool): whether or not to return output with ascii colorization.
+
+        Returns:
+            int: May have ascii colorization.
+
+        """
+        if self.space.node[(x, y)]['locale'].fauna:
+            if colorize:
+                return GRAYSCALE_COLOR_KEY[int(self.space.node[(x, y)]['locale'].fauna[index].population * scale_factor //1)]
+            else:
+                return int(self.space.node[(x, y)]['locale'].fauna[index].population * scale_factor //1)
+
     def erode_one(self, node, magnitude=1.0, rate=0.01):
         """This will cause erosion to occur at one location.
 
@@ -361,8 +433,6 @@ class Region(object):
             slope = 0.01
         transport = self.space.node[node]['locale'].geology.erode(magnitude, rate, slope)
         self.space.node[lowest_neighbor]['locale'].geology.accrete(transport)
-
-
 
     def erode_all(self, magnitude=1.0, rate=0.01):
         """erode_all docs
@@ -403,7 +473,6 @@ class Region(object):
                     print(north, south, east, west)
                     self.space.node[(x, y)]['locale'].geology._calculate_aspect(north, south, east, west)
 
-
     def randomize_elevation_base(self, mean=5, sd=1.5):
         """randomize_elevation_base docs
 
@@ -437,7 +506,7 @@ class Region(object):
         """
         pass
 
-    def get_locale(self,x,y):
+    def get_locale(self,x=0,y=0):
         if x> self.xdim or y>self.ydim or x <0 or y <0:
             print("Value out of range.")
             return None

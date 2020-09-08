@@ -14,8 +14,9 @@ class Feature(object):
         location (beringia.locale.Locale):
 
     """
-    def __init__(self, location=None):
+    def __init__(self, location=None, locale=None):
         self.location = location
+        self.locale = locale
 
     def has_location(self):
         """has_location docs

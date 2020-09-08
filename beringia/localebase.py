@@ -104,15 +104,17 @@ class Locale(object):
     a local ecosystem. It has been conceived of initially as a patch of land about 1 acre in size.
 
     """
-    def __init__(self, flora_system = 1):
+    def __init__(self, flora_system = 1, fauna_depth=1):
         self.flora = self._flora_switch(flora_system)
         self.flora_system = flora_system
         if FEATURES_SWITCH['geology']:
             self.geology = Geology()
         if FEATURES_SWITCH['fauna']:
             self.fauna = []
-            self.insert_fauna()
+            for _ in range(fauna_depth):
+                self.insert_fauna()
             self.fauna_set_simple_food_chain()
+        self.fauna_depth = fauna_depth
         self.state = self.flora.state
         self.on_fire = self.flora.on_fire
 
@@ -152,11 +154,17 @@ class Locale(object):
             new_fauna=BulkFauna()
         self.fauna.append(new_fauna)
 
+    def remove_single_fauna(self):
+        self.fauna.pop()
+
+
     def fauna_set_simple_food_chain(self):
         if self.fauna:
             self.fauna[0].prey = self.flora
             for i in range (len(self.fauna)-1):
                 self.fauna[i+1].prey = self.fauna[i]
+            return True
+        return False
 
     def pass_time(self, ticks=1):
         """pass_time doc
@@ -171,7 +179,6 @@ class Locale(object):
         if self.fauna:
             for taxa in self.fauna:
                 taxa.pass_turn()
-
 
     def risk_fire(self):
         """risk_fire docs
