@@ -104,7 +104,7 @@ class Locale(object):
     a local ecosystem. It has been conceived of initially as a patch of land about 1 acre in size.
 
     """
-    def __init__(self, flora_system = 1, fauna_depth=1):
+    def __init__(self, flora_system = 1, fauna_depth=1, location=None):
         self.flora = self._flora_switch(flora_system)
         self.flora_system = flora_system
         if FEATURES_SWITCH['geology']:
@@ -117,6 +117,7 @@ class Locale(object):
         self.fauna_depth = fauna_depth
         self.state = self.flora.state
         self.on_fire = self.flora.on_fire
+        self.location = location
 
     def __str__(self):
         if self.flora_system == 1:
@@ -151,7 +152,7 @@ class Locale(object):
         if target==None:
             pass
         if new_fauna==None:
-            new_fauna=BulkFauna()
+            new_fauna = BulkFauna(location=self)
         self.fauna.append(new_fauna)
 
     def remove_single_fauna(self):

@@ -70,3 +70,5 @@ FEATURES_SWITCH = {
     'geology': True,
     'fauna': True
 }
+
+CONT_TO_DISC_FAUNA_CONVERSION=100

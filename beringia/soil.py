@@ -24,9 +24,11 @@ Todo:
 
 """
 import numpy as np
+from beringia.feature import Feature
 
 
-class Geology(object):
+
+class Geology(Feature):
     """Geology class docs
 
     Args:

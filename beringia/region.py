@@ -47,7 +47,7 @@ class Region(object):
             # TODO: raise exception? default to 2d?
             self.space = nx.grid_2d_graph(self.xdim, ydim)
         for node in self.space.nodes:
-            self.space.node[node]['locale'] = Locale(flora_system=flora_system)
+            self.space.node[node]['locale'] = Locale(flora_system=flora_system, location=node)
         self.nodes = set([node for node in self.space.nodes])
         if edges:
             self._add_border_nodes()
