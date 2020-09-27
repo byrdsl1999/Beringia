@@ -214,7 +214,7 @@ class Region(object):
             out = ''
             for y in range(self.ydim):
                 for x in range(self.xdim):
-                    out += str(self.view_fauna_pop(x, y, index, colorize=True))
+                    out += str(self.view_fauna_pop(x, y, index, colorize=True, ceiling=10.0))
                 out += '\n'
             if do_print:
                 print(out)
@@ -393,7 +393,7 @@ class Region(object):
         else:
             return self.space.node[(x, y)]['locale'].geology.elevation
 
-    def view_fauna_pop(self, x=0, y=0, index=0, colorize=False, scale_factor=100):
+    def view_fauna_pop(self, x=0, y=0, index=0, colorize=False, scale_factor=1.0, ceiling=100.0):
         """view_elevation docs
 
         Args:
@@ -408,7 +408,7 @@ class Region(object):
         """
         if self.space.node[(x, y)]['locale'].fauna:
             if colorize:
-                return GRAYSCALE_COLOR_KEY[int(self.space.node[(x, y)]['locale'].fauna[index].population * scale_factor //1)]
+                return GRAYSCALE_COLOR_KEY[min(ceiling, (int(self.space.node[(x, y)]['locale'].fauna[index].population * scale_factor //1)))]
             else:
                 return int(self.space.node[(x, y)]['locale'].fauna[index].population * scale_factor //1)
 
