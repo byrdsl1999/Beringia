@@ -206,12 +206,13 @@ class BulkFauna(Fauna):
     """
 
     def __init__(self, population=1, reproduction_rate=0.04, starvation_rate=0.3, feeding_rate=0.3,
-                 emigration_rate=0.1, prey=FeedBag(), location=None):
+                 emigration_rate=0.1, prey=FeedBag(), location=None, name=None):
         """
 
-        :type prey: object
+        :type prey: feature
         """
         super().__init__(location=location)
+        self.name = name
         self.population = population
         self.reproduction_rate = reproduction_rate  # Repro rate is essentially the energy conversion rate. (eg 10 lb grass makes 1 lb beef)
         self.starvation_rate = starvation_rate
@@ -228,11 +229,18 @@ class BulkFauna(Fauna):
         self.prey = prey
         self.verbose = False
 
+
     def __repr__(self):
-        if not self.verbose:
-            return("Bulk Fauna: "+str(self.population))
+        if self.name:
+            if not self.verbose:
+                return(name+" "+str(self.population))
+            else:
+                return(name+" Pop: "+str(self.population)+" Stress: "+str(self.stress)) #TODO change something more specific
         else:
-            return("Bulk Fauna Pop: "+str(self.population)+" Stress: "+str(self.stress)) #TODO change something more specific
+            if not self.verbose:
+                return("Bulk Fauna: "+str(self.population))
+            else:
+                return("Bulk Fauna Pop: "+str(self.population)+" Stress: "+str(self.stress)) #TODO change something more specific
 
 
     def _zero_correct_pop(self):
@@ -413,10 +421,16 @@ class BulkFaunaD(Fauna):
         self.verbose = True
 
     def __repr__(self):
-        if not self.verbose:
-            return("Bulk Fauna D: "+str(self.population))
+        if self.name:
+            if not self.verbose:
+                return(name+" "+str(self.population))
+            else:
+                return(name+" Pop: "+str(self.population)+" Stress: "+str(self.stress)) #TODO change something more specific
         else:
-            return("Bulk Fauna D Pop: "+str(self.population)+" Stress: "+str(self.stress)) #TODO change something more specific
+            if not self.verbose:
+                return("Bulk Fauna D: "+str(self.population))
+            else:
+                return("Bulk Fauna D Pop: "+str(self.population)+" Stress: "+str(self.stress)) #TODO change something more specific
 
 
     def _zero_correct_pop(self):

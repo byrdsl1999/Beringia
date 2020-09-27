@@ -47,7 +47,7 @@ class Region(object):
             # TODO: raise exception? default to 2d?
             self.space = nx.grid_2d_graph(self.xdim, ydim)
         for node in self.space.nodes:
-            self.space.node[node]['locale'] = Locale(flora_system=flora_system, location=node)
+            self.space.node[node]['locale'] = Locale(flora_system=flora_system, location=node, region=self)
         self.nodes = set([node for node in self.space.nodes])
         if edges:
             self._add_border_nodes()
@@ -56,6 +56,7 @@ class Region(object):
         self.colorize = colorize
         self.slow_burn = slow_burn
         self.constants = STATE_CONSTANTS
+        self.verbose = False
 
 
     #def _scheduler(self):
@@ -506,9 +507,51 @@ class Region(object):
         """
         pass
 
-    def get_locale(self,x=0,y=0):
+    def get_locale(self, x=0, y=0):
         if x> self.xdim or y>self.ydim or x <0 or y <0:
             print("Value out of range.")
             return None
         else:
             return self.space.node[(x,y)]['locale']
+
+    def get_neighbors(self, x=0, y=0, depth=1, tiered=False, ids=False, borders=False):
+        if x > self.xdim or y > self.ydim or x < 0 or y < 0:
+            if self.verbose:
+                print("Value out of range.")
+            return None
+        else:
+            explored = set()
+            neighbors = []
+            new_queue = [self.get_locale(x,y).location]
+            for _ in range(depth):
+                queue = new_queue
+                new_queue = []
+                if tiered:
+                    tier = []
+                for node in queue:
+                    if (node[0] < 0 or node[0] > self.xdim or node[1] < 0 or node[1] > self.ydim) and borders is False:
+                        pass
+                    else:
+                        if node not in explored:
+                            neighbs = self.space.neighbors(node)
+                            neighbs = [n for n in neighbs if n not in explored]     # removing duplicates.
+                            if not borders:
+                                neighbs = [n for n in neighbs if
+                                           not (n[0] < 0 or n[0] > self.xdim or n[1] < 0 or n[1] > self.ydim)]
+                            if ids:
+                                if tiered:
+                                    tier.extend(neighbs)
+                                else:
+                                    neighbors.extend(neighbs)
+                            else:
+                                if tiered:
+                                    tier.extend([self.get_locale(*locale) for locale in neighbs])
+                                else:
+                                    neighbors.extend([self.get_locale(*locale) for locale in neighbs])
+                            new_queue.extend(neighbs)
+                    explored.add(node)
+                if tiered:
+                    neighbors.append(tier)
+
+        return neighbors
+
