@@ -45,9 +45,11 @@ class Geology(Feature):
         self.elevation = self._elevation()
         #self.water_content = self.soil_depth * self.soil_moisture
         self.hydrology = Hydrology(water_content= soil_moisture*soil_depth, water_capacity=soil_depth)
-        self.soil_moisture=self.hydrology.water_content/self.hydrology.water_capacity
-        self.soil_stability=0.0
-        self.basin_elevation = self.elevation
+        self.soil_moisture = self.hydrology.water_content/self.hydrology.water_capacity
+        self.soil_stability = 0.0
+        self.basin_elevation = self.elevation   #If a locale is part of a basin, this value is equal to the height of the lowest point constraining the basin(ie, where water would flow out if you filled up the basin.).
+        self.is_in_basin = False
+        self.is_local_minimum = False
         self.aspect = self._calculate_aspect()
 
     def recalculate_values(self):
@@ -63,6 +65,9 @@ class Geology(Feature):
     def set_basin_elevation(self, elevation = None):
         if not elevation: elevation = self.elevation
         self.basin_elevation = elevation
+
+    def set_is_in_basin(self, is_in=False):
+        self.is_in_basin = is_in
 
     def _calculate_aspect(self, north_elev=None, south_elev=None, east_elev=None, west_elev=None):
         """Calculate the slope aspect(direction).
@@ -145,6 +150,7 @@ class Hydrology(object):
         self.water_capacity = water_capacity
         self.water_depth = 0.0
         self.water_elevation = 0.0
+        self.max_water_depth=0.0
 
     def update_capacity(self, new_value):
         self.water_capacity = new_value

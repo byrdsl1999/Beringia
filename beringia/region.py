@@ -15,6 +15,7 @@ import time
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+import heapq
 
 from beringia.localebase import Locale
 from beringia.localebase import Border
@@ -57,6 +58,7 @@ class Region(object):
         self.slow_burn = slow_burn
         self.constants = STATE_CONSTANTS
         self.verbose = False
+        self.basins_current=False
 
 
     #def _scheduler(self):
@@ -117,7 +119,7 @@ class Region(object):
         """show_map docs
 
         Args:
-            do_print (bool):
+            do_print (bool): T/F, should the output be printed(T), or returned as an array(F).
             show_fire (bool):
             colorize (bool):
 
@@ -158,7 +160,7 @@ class Region(object):
         """Display a visual representation of the self.space attribute with fire state layered on if doPrint.
 
         Args:
-            do_print (bool):
+            do_print (bool): T/F, should the output be printed(T), or returned as an array(F).
 
         Returns:
              str:
@@ -181,7 +183,7 @@ class Region(object):
         """show_elevation_map docs
 
         Args:
-            do_print (bool):
+            do_print (bool): T/F, should the output be printed(T), or returned as an array(F).
 
         Returns:
             str:
@@ -201,10 +203,11 @@ class Region(object):
             print('!!! This grid type does not have this feature implemented !!!')
 
     def show_fauna_map(self, do_print=True, index=0):
-        """show_elevation_map docs
+        """show_fauna_map docs
 
         Args:
-            do_print (bool):
+            do_print (bool): T/F, should the output be printed(T), or returned as an array(F).
+            index (int): The index of which fauna should be displayed/returned.
 
         Returns:
             str:
@@ -435,6 +438,8 @@ class Region(object):
         transport = self.space.node[node]['locale'].geology.erode(magnitude, rate, slope)
         self.space.node[lowest_neighbor]['locale'].geology.accrete(transport)
 
+        self.basins_current=False
+
     def erode_all(self, magnitude=1.0, rate=0.01):
         """erode_all docs
 
@@ -505,12 +510,68 @@ class Region(object):
         basin.
         TODO: Maybe we should track all the basins, and then populate them with fish!
         """
-        pass
+        heightMap = self.get_map_array('elev')
+        h = []
+
+        row_l = self.xdim
+        col_l = self.ydim
+
+        visited = set()
+
+        for i in range(row_l):
+            heapq.heappush(h, (heightMap[i][0], i, 0))
+            heapq.heappush(h, (heightMap[i][col_l - 1], i, col_l - 1))
+            visited.add((i, 0))
+            visited.add((i, col_l - 1))
+        for j in range(col_l):
+            heapq.heappush(h, (heightMap[0][j], 0, j))
+            heapq.heappush(h, (heightMap[row_l - 1][j], row_l - 1, j))
+            visited.add((0, j))
+            visited.add((row_l - 1, j))
+
+        total = 0
+        maxi = float('-inf')
+
+        while len(h) > 0:
+            height, row, col = heapq.heappop(h)
+
+            maxi = max(maxi, height)
+
+            for dir in [(1, 0), (-1, 0), (0, -1), (0, 1)]:
+                row1 = row + dir[0]
+                col1 = col + dir[1]
+
+                if 0 <= row1 < row_l and 0 <= col1 < col_l and (row1, col1) not in visited:
+                    if maxi > heightMap[row1][col1]:
+                        self.get_locale(row1, col1).geology.set_is_in_basin(True)
+                        self.get_locale(row1, col1).geology.set_basin_elevation(maxi)
+                        # TODO determine if local minimum.
+                        total += (maxi - heightMap[row1][col1])
+                    else:
+                        self.get_locale(row1, col1).geology.set_is_in_basin(False)
+                        self.get_locale(row1, col1).geology.set_basin_elevation(
+                            self.get_locale(row1, col1).geology.elevation)
+                    heapq.heappush(h, (heightMap[row1][col1], row1, col1))
+                    visited.add((row1, col1))
+                    if self.verbose: print(row1, col1, (maxi - heightMap[row1][col1]))
+
+        return bool(total)
+
+    def get_basins(self):
+        if not self.basins_current:
+            self.find_basins()
+        basins=[]
+        for y in range(self.ydim):
+            for x in range(self.xdim):
+                if self.get_locale(x,y).geology.is_in_basin:
+                    basins.append(self.get_locale(x,y))
+        return basins
+
 
     def get_locale(self, x=0, y=0):
         if x> self.xdim or y>self.ydim or x <0 or y <0:
             print("Value out of range.")
-            return None
+            return Nor.gne
         else:
             return self.space.node[(x,y)]['locale']
 
