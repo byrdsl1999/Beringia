@@ -16,6 +16,8 @@ STATE_CONSTANTS = {
 }
 
 
+
+#TODO look into implementing 'rich' package.
 PLANT_COLOR_KEY = {
     0: '\033[1;30;48;5;246m0\033[0;39m',
     1: '\033[1;30;48;5;226m1\033[0;39m',

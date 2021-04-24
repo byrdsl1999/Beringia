@@ -15,7 +15,7 @@ Todo:
         accumulation X
         Plants reducing soil erosion
     * soil moisture
-    * elevation
+    * elevation X
     * hydrology
         standing water
         evaporation
@@ -68,6 +68,14 @@ class Geology(Feature):
 
     def set_is_in_basin(self, is_in=False):
         self.is_in_basin = is_in
+
+    def get_basin_depth(self):
+        if self.is_in_basin:
+            return self.basin_elevation - self.elevation
+        else:
+            0.0
+
+
 
     def _calculate_aspect(self, north_elev=None, south_elev=None, east_elev=None, west_elev=None):
         """Calculate the slope aspect(direction).
